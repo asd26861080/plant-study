@@ -10,14 +10,15 @@
         
         #statusHeader { margin: -15px -15px 15px -15px; padding: 12px; border-radius: 20px 20px 0 0; background: #6b3c2e; color: white; font-weight: bold; font-size: 18px; }
 
+        /* 測驗核心區 */
         .img-box { width: 100%; height: 320px; background: #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; border: 2px solid #f4d36a; cursor: zoom-in; }
         img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
         #answer { font-size: 22px; font-weight: bold; color: #7e4a2f; margin: 10px 0; min-height: 1.5em; background: #fff9e6; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         
-        /* 操作按鈕區 */
+        /* 按鈕區佈局 */
         .btn-stack { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-        button { padding: 15px; font-size: 18px; cursor: pointer; border: none; border-radius: 10px; font-weight: bold; transition: 0.2s; color: #6b3c2e; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { padding: 14px; font-size: 18px; cursor: pointer; border: none; border-radius: 10px; font-weight: bold; transition: 0.2s; color: #6b3c2e; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         button:active { transform: scale(0.96); }
 
         .btn-ans { background: #F5B08E; width: 100%; font-size: 20px; }
@@ -27,26 +28,29 @@
         .btn-prev { background: #f4d36a; }
         .btn-next { background: #d77c29; color: white; }
         
-        /* 資訊控制區 */
-        .info-controls { margin: 15px 0; padding: 12px; background: #fff9e6; border-radius: 10px; border: 1px dashed #d77c29; }
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; }
+        /* 資訊控制區：修正錯位與置中問題 */
+        .info-controls { margin: 15px 0; padding: 12px 8px; background: #fff9e6; border-radius: 10px; border: 1px dashed #d77c29; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; min-height: 40px; }
         
-        #stats-container { flex-grow: 1; text-align: center; }
-        #stats { font-size: 16px; font-weight: bold; display: block; }
-        #starCountText { font-size: 13px; color: #9a5a2e; display: block; margin-top: 2px; }
+        #stats-container { flex: 1; text-align: center; padding: 0 5px; }
+        #stats { font-size: 15px; font-weight: bold; display: block; white-space: nowrap; }
+        #starCountText { font-size: 12px; color: #9a5a2e; display: block; margin-top: 2px; }
 
-        .side-ctrl { width: 110px; display: flex; align-items: center; font-size: 13px; font-weight: bold; }
+        /* 防止跳題文字斷行，並垂直置中 */
+        .side-ctrl { display: flex; align-items: center; font-size: 13px; font-weight: bold; white-space: nowrap; }
+        .jump-label { margin-right: 4px; flex-shrink: 0; }
 
         /* 底部管理區 */
-        #modeBtn { margin-top: 20px; width: 100%; background: #9a5a2e; color: white; }
+        #modeBtn { margin-top: 15px; width: 100%; background: #9a5a2e; color: white; }
         #shuffleBtn { margin-top: 8px; width: 100%; background: #6b3c2e; color: white; }
         .admin-btn { background: #b2bec3; color: white; width: 100%; margin-top: 8px; }
 
+        /* 放大鏡 Modal */
         #zoomModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
         #zoomImg { max-width: 98%; max-height: 98%; object-fit: contain; }
 
-        select { padding: 4px; border-radius: 5px; border: 1px solid #d77c29; background: white; font-size: 14px; width: 80px; }
-        input[type="checkbox"] { transform: scale(1.1); margin-right: 4px; }
+        select { padding: 4px; border-radius: 5px; border: 1px solid #d77c29; background: white; font-size: 14px; width: 70px; }
+        input[type="checkbox"] { transform: scale(1.1); margin-right: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -55,7 +59,7 @@
     <div id="statusHeader">🌐 全庫練習模式</div>
 
     <div class="img-box" onclick="openZoom()">
-        <img id="displayImg" src="">
+        <img id="displayImg" src="" alt="植物圖片">
     </div>
     
     <div id="answer"></div>
@@ -72,7 +76,8 @@
     <div class="info-controls">
         <div class="info-row">
             <div class="side-ctrl" id="jumpArea">
-                跳題: <select id="jumpSelect" onchange="jumpToQuestion()"></select>
+                <span class="jump-label">跳題:</span>
+                <select id="jumpSelect" onchange="jumpToQuestion()"></select>
             </div>
             
             <div id="stats-container">
@@ -80,7 +85,7 @@
                 <span id="starCountText">(星號數量: 0)</span>
             </div>
             
-            <div class="side-ctrl" style="justify-content: flex-end; width: 120px;">
+            <div class="side-ctrl" style="justify-content: flex-end;">
                 <label style="display: flex; align-items: center; cursor: pointer;">
                     <input type="checkbox" id="autoShowCheck" onchange="updateDisplay()"> 自動顯示答案
                 </label>
@@ -96,18 +101,18 @@
 </div>
 
 <div id="zoomModal" onclick="closeZoom()">
-    <img id="zoomImg">
+    <img id="zoomImg" src="">
     <div style="position:absolute; top:20px; right:20px; color:white; font-size:30px;">✕</div>
 </div>
 
 <script>
-    // 🚩 請務必在此貼入完整檔名
+    // 🚩 請務必在此貼入 2003 個檔名的完整陣列
     const originalPhotoNames = ["一串紅（爆竹紅） (1).jpg","一串紅（爆竹紅） (2).jpg","一串紅（爆竹紅） (3).jpg","三色堇 (1).jpg","三色堇 (2).jpg","中耕機 (1).jpg","中耕機 (2).jpg","中耕機 (3).jpg","九重葛 (1).jpg","九重葛 (2).jpg","九重葛 (3).jpg","九重葛 (4).jpg","九重葛 (5).jpg","九重葛 (6).jpg","九重葛 (7).jpg","九重葛 (8).jpg","九重葛 (9).jpg","仙丹花 (1).jpg","仙丹花 (2).jpg","仙丹花 (3).jpg","仙丹花 (4).jpg","仙丹花 (5).jpg","仙客來 (1).jpg","仙客來 (2).jpg","仙客來 (3).jpg","仙履蘭（拖鞋蘭） (1).jpg","仙履蘭（拖鞋蘭） (2).jpg","仙履蘭（拖鞋蘭） (3).jpg","仙履蘭（拖鞋蘭） (4).jpg","仙履蘭（拖鞋蘭） (5).jpg","使君子 (1).jpg","使君子 (2).jpg","使君子 (3).jpg","使君子 (4).jpg","使君子 (5).jpg","修枝剪 (1).jpg","修枝剪 (2).jpg","修籬機（修剪機） (1).jpg","修籬機（修剪機） (2).jpg","光蠟樹 (1).jpg","光蠟樹 (2).jpg","光蠟樹 (3).jpg","光蠟樹 (4).jpg","光蠟樹 (5).jpg","八爪滴頭 (1).jpg","八爪滴頭 (2).jpg","冬瓜 (1).jpg","冬瓜 (10).jpg","冬瓜 (11).jpg","冬瓜 (12).jpg","冬瓜 (13).jpg","冬瓜 (2).jpg","冬瓜 (3).jpg","冬瓜 (4).jpg","冬瓜 (5).jpg","冬瓜 (6).jpg","冬瓜 (7).jpg","冬瓜 (8).jpg","冬瓜 (9).jpg","切接刀 (1).jpg","切接刀 (2).jpg","切接刀 (3).jpg","剪定鋏 (1).jpg","剪定鋏 (2).jpg","剪定鋏 (3).jpg","剪定鋏 (4).jpg","剪定鋏 (5).jpg","剪定鋏 (6).jpg","剪定鋏 (7).jpg","動力噴霧機.jpg","千日紅 (1).jpg","千日紅 (2).jpg","千日紅 (3).jpg","南天竹 (1).jpg","南天竹 (2).jpg","南天竹 (3).jpg","南天竹 (4).jpg","南天竹 (5).jpg","南天竹 (6).jpg","南瓜 (1).jpg","南瓜 (10).jpg","南瓜 (11).jpg","南瓜 (12).jpg","南瓜 (13).jpg","南瓜 (14).jpg","南瓜 (15).jpg","南瓜 (2).jpg","南瓜 (3).jpg","南瓜 (4).jpg","南瓜 (5).jpg","南瓜 (6).jpg","南瓜 (7).jpg","南瓜 (8).jpg","南瓜 (9).jpg","南美蟛蜞菊 (1).jpg","南美蟛蜞菊 (2).jpg","南美蟛蜞菊 (3).jpg","南美蟛蜞菊 (4).jpg","可可 (1).jpg","可可 (10).jpg","可可 (11).jpg","可可 (13).jpg","可可 (14).jpg","可可 (15).jpg","可可 (2).jpg","可可 (3).jpg","可可 (4).jpg","可可 (5).jpg","可可 (6).jpg","可可 (7).jpg","可可 (8).jpg","可可 (9).jpg","可可(12).jpg","可可椰子 (1).jpg","可可椰子 (10).jpg","可可椰子 (2).jpg","可可椰子 (3).jpg","可可椰子 (4).jpg","可可椰子 (5).jpg","可可椰子 (6).jpg","可可椰子 (7).jpg","可可椰子 (8).jpg","可可椰子 (9).jpg","台灣欒樹 (1).jpg","台灣欒樹 (2).jpg","台灣欒樹 (3).jpg","台灣欒樹 (4).jpg","台灣欒樹 (5).jpg","台灣欒樹 (6).jpg","吊蘭 (1).jpg","吊蘭 (2).jpg","吊蘭 (3).jpg","吊蘭 (4).jpg","吊蘭 (5).jpg","吊蘭 (6).jpg","吊蘭 (7).jpg","向日葵 (1).jpg","向日葵 (2).jpg","向日葵 (3).jpg","向日葵 (4).jpg","咖啡 (1).jpg","咖啡 (10).jpg","咖啡 (11).jpg","咖啡 (2).jpg","咖啡 (3).jpg","咖啡 (4).jpg","咖啡 (5).jpg","咖啡 (6).jpg","咖啡 (7).jpg","咖啡 (8).jpg","咖啡 (9).jpg","唐菖蒲（劍蘭） (1).jpg","唐菖蒲（劍蘭） (2).jpg","唐菖蒲（劍蘭） (3).jpg","唐菖蒲（劍蘭） (4).jpg","唐菖蒲（劍蘭） (5).jpg","嘉寶果（樹葡萄） (1).jpg","嘉寶果（樹葡萄） (10).jpg","嘉寶果（樹葡萄） (2).jpg","嘉寶果（樹葡萄） (3).jpg","嘉寶果（樹葡萄） (4).jpg","嘉寶果（樹葡萄） (5).jpg","嘉寶果（樹葡萄） (6).jpg","嘉寶果（樹葡萄） (7).jpg","嘉寶果（樹葡萄） (8).jpg","嘉寶果（樹葡萄） (9).jpg","嘉德麗亞（雅）蘭 (1).jpg","嘉德麗亞（雅）蘭 (2).jpg","嘉德麗亞（雅）蘭 (3).jpg","嘉德麗亞（雅）蘭 (4).jpg","嘉德麗亞（雅）蘭 (5).jpg","嘉德麗亞（雅）蘭 (6).jpg","噴嘴 (1).jpg","噴嘴 (2).jpg","噴嘴 (3).jpg","噴水帶 (1).jpg","噴水帶 (2).jpg","噴水帶 (3).jpg","噴水帶 (4).jpg","噴水帶 (5).jpg","噴水帶 (6).jpg","噴藥車 (1).jpg","噴藥車 (2).jpg","噴藥車 (3).jpg","四季桔（金桔） (1).jpg","四季桔（金桔） (10).jpg","四季桔（金桔） (2).jpg","四季桔（金桔） (3).jpg","四季桔（金桔） (4).jpg","四季桔（金桔） (5).jpg","四季桔（金桔） (6).jpg","四季桔（金桔） (7).jpg","四季桔（金桔） (8).jpg","四季桔（金桔） (9).jpg","四季秋海棠 (1).jpg","四季秋海棠 (2).jpg","四季秋海棠 (3).jpg","四季豆（敏豆） (1).jpg","四季豆（敏豆） (2).jpg","四季豆（敏豆） (3).jpg","四季豆（敏豆） (4).jpg","四季豆（敏豆） (5).jpg","四季豆（敏豆） (6).jpg","四季豆（敏豆） (7).jpg","四季豆（敏豆） (8).jpg","圓鍬.jpg","垂枝茉莉（白玉蝴蝶） (1).jpg","垂枝茉莉（白玉蝴蝶） (2).jpg","垂枝茉莉（白玉蝴蝶） (3).jpg","垂枝茉莉（白玉蝴蝶） (4).jpg","垂枝茉莉（白玉蝴蝶） (5).jpg","垂枝茉莉（白玉蝴蝶） (6).jpg","報歲蘭 (1).jpg","報歲蘭 (2).jpg","報歲蘭 (3).jpg","塑膠盆 (1).jpg","塑膠盆 (2).jpg","塑膠盆 (3).jpg","塑膠盆 (4).jpg","塑膠盆 (5).jpg","壓條線 (1).jpg","壓條線 (2).jpg","壓條線 (3).jpg","壓條線 (4).jpg","壓條線 (5).jpg","壓條線 (6).jpg","夏堇 (1).jpg","夏堇 (2).jpg","夏堇 (3).jpg","夏堇 (4).jpg","夏堇 (5).jpg","夜來香 (1).jpg","夜來香 (2).jpg","夜來香 (3).jpg","大岩桐 (1).jpg","大岩桐 (2).jpg","大岩桐 (3).jpg","大岩桐 (4).jpg","大岩桐 (5).jpg","大岩桐 (6).jpg","大波斯菊 (1).jpg","大波斯菊 (2).jpg","大波斯菊 (3).jpg","大波斯菊 (4).jpg","大波斯菊 (5).jpg","大王椰子 (1).jpg","大王椰子 (2).jpg","大王椰子 (3).jpg","大王椰子 (4).jpg","大王椰子 (5).jpg","大理花（大麗花） (1).jpg","大理花（大麗花） (2).jpg","大理花（大麗花） (3).jpg","大理花（大麗花） (4).jpg","大理花（大麗花） (5).jpg","大理花（大麗花） (6).jpg","大理花（大麗花） (7).jpg","大理花（大麗花） (8).jpg","大花紫薇 (1).jpg","大花紫薇 (2).jpg","大花紫薇 (3).jpg","大花紫薇 (4).jpg","大花紫薇 (5).jpg","大花紫薇 (6).jpg","大萍（水芙蓉） (1).jpg","大萍（水芙蓉） (2).jpg","大萍（水芙蓉） (3).jpg","大蒜（青蒜） (1).jpg","大蒜（青蒜） (10).jpg","大蒜（青蒜） (2).jpg","大蒜（青蒜） (3).jpg","大蒜（青蒜） (4).jpg","大蒜（青蒜） (5).jpg","大蒜（青蒜） (6).jpg","大蒜（青蒜） (7).jpg","大蒜（青蒜） (8).jpg","大蒜（青蒜） (9).jpg","大鄧伯花(1).jpg","大鄧伯花(2).jpg","大鄧伯花(3).jpg","大鄧伯花(4).jpg","大鄧伯花(5).jpg","天使花 (1).jpg","天使花 (2).jpg","天使花 (3).jpg","孔雀草 (1).jpg","孔雀草 (2).jpg","孔雀草 (3).jpg","孤挺花 (1).jpg","孤挺花 (2).jpg","小葉南洋杉 (1).jpg","小葉南洋杉 (2).jpg","小葉南洋杉 (3).jpg","小葉南洋杉 (4).jpg","小葉南洋杉 (5).jpg","山竹 (1).jpg","山竹 (2).jpg","山竹 (3).jpg","山竹 (4).jpg","山竹 (5).jpg","山竹 (6).jpg","山藥 (1).jpg","山藥 (2).jpg","山藥 (3).jpg","山藥 (4).jpg","山藥 (5).jpg","山藥 (6).jpg","山藥 (7).jpg","布袋蓮 (1).jpg","布袋蓮 (2).jpg","布袋蓮 (3).jpg","布袋蓮 (4).jpg","布袋蓮 (5).jpg","布袋蓮 (6).jpg","布袋蓮 (7).jpg","布袋蓮 (8).jpg","布袋蓮 (9).jpg","常春藤 (1).jpg","常春藤 (2).jpg","常春藤 (3).jpg","彈簧夾 (1).jpg","彈簧夾 (2).jpg","彈簧夾 (3).jpg","彈簧夾 (4).jpg","彩色海芋 (1).jpg","彩色海芋 (2).jpg","彩色海芋 (3).jpg","彩色海芋 (4).jpg","彩葉甘藍（葉牡丹） (1).jpg","彩葉甘藍（葉牡丹） (2).jpg","彩葉甘藍（葉牡丹） (3).jpg","彩葉甘藍（葉牡丹） (4).jpg","彩葉芋 (1).jpg","彩葉芋 (2).jpg","彩葉草 (1).jpg","彩葉草 (2).jpg","彩葉草 (3).jpg","彩葉草 (4).jpg","彩葉草 (5).jpg","彩葉草 (6).jpg","彩葉草 (7).jpg","忍冬（金銀花） (1).jpg","忍冬（金銀花） (2).jpg","忍冬（金銀花） (3).jpg","忍冬（金銀花） (4).jpg","忍冬（金銀花） (5).jpg","忍冬（金銀花） (6).jpg","扁蒲 (1).jpg","扁蒲 (2).jpg","扁蒲 (3).jpg","扁蒲 (4).jpg","扁蒲 (5).jpg","扁蒲 (6).jpg","扁蒲 (7).jpg","扁蒲 (8).jpg","搬運車 (1).jpg","搬運車 (2).jpg","搬運車 (3).jpg","搬運車 (4).jpg","文心蘭 (1).jpg","文心蘭 (2).jpg","文心蘭 (3).jpg","文心蘭 (4).jpg","文心蘭 (5).jpg","文旦柚 (1).jpg","文旦柚 (10).jpg","文旦柚 (11).jpg","文旦柚 (2).jpg","文旦柚 (3).jpg","文旦柚 (4).jpg","文旦柚 (5).jpg","文旦柚 (6).jpg","文旦柚 (7).jpg","文旦柚 (8).jpg","文旦柚 (9).jpg","星爍山茉莉（煙火樹） (1).jpg","星爍山茉莉（煙火樹） (2).jpg","星爍山茉莉（煙火樹） (3).jpg","星爍山茉莉（煙火樹） (4).jpg","星爍山茉莉（煙火樹） (5).jpg","星蘋果（牛奶果） (1).jpg","星蘋果（牛奶果） (2).jpg","星蘋果（牛奶果） (3).jpg","星蘋果（牛奶果） (4).jpg","星蘋果（牛奶果） (5).jpg","星蘋果（牛奶果） (6).jpg","星蘋果（牛奶果） (7).jpg","星蘋果（牛奶果） (8).jpg","星蘋果（牛奶果） (9).jpg","春不老 (1).jpg","春不老 (2).jpg","春不老 (3).jpg","春不老 (4).jpg","春不老 (5).jpg","春不老 (6).jpg","春石斛蘭 (1).jpg","春石斛蘭 (2).jpg","春石斛蘭 (3).jpg","春石斛蘭 (4).jpg","春石斛蘭 (5).jpg","春石斛蘭 (6).jpg","時間控制器（定時器） (1).jpg","時間控制器（定時器） (2).jpg","月橘（七里香） (1).jpg","月橘（七里香） (2).jpg","月橘（七里香） (3).jpg","月橘（七里香） (4).jpg","月橘（七里香） (5).jpg","木棉 (1).jpg","木棉 (2).jpg","木棉 (3).jpg","木棉 (4).jpg","木棉 (5).jpg","木棉 (6).jpg","木棉 (7).jpg","木棉 (8).jpg","木棉 (9).jpg","木棉(10).jpg","木槿 (1).jpg","木槿 (2).jpg","木槿 (3).jpg","木槿 (4).jpg","木槿 (5).jpg","木槿 (6).jpg","木玫瑰 (1).jpg","木玫瑰 (10).jpg","木玫瑰 (11).jpg","木玫瑰 (12).jpg","木玫瑰 (2).jpg","木玫瑰 (3).jpg","木玫瑰 (4).jpg","木玫瑰 (5).jpg","木玫瑰 (6).jpg","木玫瑰 (7).jpg","木玫瑰 (8).jpg","木玫瑰 (9).jpg","木瓜（番木瓜） (1).jpg","木瓜（番木瓜） (2).jpg","木瓜（番木瓜） (3).jpg","木瓜（番木瓜） (4).jpg","木瓜（番木瓜） (5).jpg","木瓜（番木瓜） (6).jpg","木鱉果 (1).jpg","木鱉果 (10).jpg","木鱉果 (11).jpg","木鱉果 (12).jpg","木鱉果 (13).jpg","木鱉果 (14).jpg","木鱉果 (15).jpg","木鱉果 (2).jpg","木鱉果 (3).jpg","木鱉果 (4).jpg","木鱉果 (5).jpg","木鱉果 (6).jpg","木鱉果 (7).jpg","木鱉果 (8).jpg","木鱉果 (9).jpg","朱槿（扶桑） (1).jpg","朱槿（扶桑） (2).jpg","朱槿（扶桑） (3).jpg","朱槿（扶桑） (4).jpg","朱槿（扶桑） (5).jpg","李 (1).jpg","李 (2).jpg","李 (3).jpg","李 (4).jpg","李 (5).jpg","李 (6).jpg","李 (7).jpg","李 (8).jpg","杏鮑菇 (1).jpg","杏鮑菇 (2).jpg","杏鮑菇 (3).jpg","杜鵑（杜鵑花） (1).jpg","杜鵑（杜鵑花） (2).jpg","杜鵑（杜鵑花） (3).jpg","杜鵑（杜鵑花） (4).jpg","杜鵑（杜鵑花） (5).jpg","杜鵑（杜鵑花） (6).jpg","杜鵑（杜鵑花） (7).jpg","杮 (1).jpg","杮 (10).jpg","杮 (11).jpg","杮 (12).jpg","杮 (13).jpg","杮 (14).jpg","杮 (2).jpg","杮 (3).jpg","杮 (4).jpg","杮 (5).jpg","杮 (6).jpg","杮 (7).jpg","杮 (8).jpg","杮 (9).jpg","東亞蘭（虎頭蘭） (1).jpg","東亞蘭（虎頭蘭） (2).jpg","東亞蘭（虎頭蘭） (3).jpg","東亞蘭（虎頭蘭） (4).jpg","東亞蘭（虎頭蘭） (5).jpg","東亞蘭（虎頭蘭） (6).jpg","東亞蘭（虎頭蘭） (7).jpg","松葉牡丹 (1).jpg","松葉牡丹 (2).jpg","枇杷 (1).jpg","枇杷 (2).jpg","枇杷 (3).jpg","枇杷 (4).jpg","枇杷 (5).jpg","枇杷 (6).jpg","柳橙 (1).jpg","柳橙 (10).jpg","柳橙 (11).jpg","柳橙 (2).jpg","柳橙 (3).jpg","柳橙 (4).jpg","柳橙 (5).jpg","柳橙 (6).jpg","柳橙 (7).jpg","柳橙 (8).jpg","柳橙 (9).jpg","桂花 (1).jpg","桂花 (2).jpg","桂花 (3).jpg","桂花 (4).jpg","桂花 (5).jpg","桂葉黃梅 (1).jpg","桂葉黃梅 (2).jpg","桂葉黃梅 (3).jpg","桂葉黃梅 (4).jpg","桂葉黃梅 (5).jpg","桃 (1).jpg","桃 (2).jpg","桃 (3).jpg","桃 (4).jpg","桃 (5).jpg","桃 (6).jpg","桃 (7).jpg","桃 (8).jpg","桃 (9).jpg","桃花心木 (1).jpg","桃花心木 (2).jpg","桃花心木 (3).jpg","桃花心木 (4).jpg","桃花心木 (5).jpg","桑椹 (1).jpg","桑椹 (10).jpg","桑椹 (11).jpg","桑椹 (12).jpg","桑椹 (13).jpg","桑椹 (14).jpg","桑椹 (15).jpg","桑椹 (2).jpg","桑椹 (3).jpg","桑椹 (4).jpg","桑椹 (5).jpg","桑椹 (6).jpg","桑椹 (7).jpg","桑椹 (8).jpg","桑椹 (9).jpg","梅 (1).jpg","梅 (2).jpg","梅 (3).jpg","梅 (4).jpg","梅 (5).jpg","梅 (6).jpg","梔子花 (1).jpg","梔子花 (2).jpg","梔子花 (3).jpg","梔子花 (4).jpg","梔子花 (5).jpg","梨 (1).jpg","梨 (10).jpg","梨 (11).jpg","梨 (12).jpg","梨 (13).jpg","梨 (2).jpg","梨 (3).jpg","梨 (4).jpg","梨 (5).jpg","梨 (6).jpg","梨 (7).jpg","梨 (8).jpg","梨 (9).jpg","棗（印度棗） (1).jpg","棗（印度棗） (10).jpg","棗（印度棗） (2).jpg","棗（印度棗） (3).jpg","棗（印度棗） (4).jpg","棗（印度棗） (5).jpg","棗（印度棗） (6).jpg","棗（印度棗） (7).jpg","棗（印度棗） (8).jpg","棗（印度棗） (9).jpg","椒草 (1).jpg","椒草 (2).jpg","椒草 (3).jpg","椒草 (4).jpg","椒草 (5).jpg","椒草 (6).jpg","椒草 (7).jpg","椒草 (8).jpg","椪柑 (1).jpg","椪柑 (2).jpg","椪柑 (3).jpg","椪柑 (4).jpg","椪柑 (5).jpg","椪柑 (6).jpg","椪柑 (7).jpg","椪柑 (8).jpg","椪柑 (9).jpg","椰子殼屑 (1).jpg","椰子殼屑 (2).jpg","椰子殼屑 (3).jpg","椰子殼屑 (4).jpg","楊桃 (1).jpg","楊桃 (10).jpg","楊桃 (2).jpg","楊桃 (3).jpg","楊桃 (4).jpg","楊桃 (5).jpg","楊桃 (6).jpg","楊桃 (7).jpg","楊桃 (8).jpg","楊桃 (9).jpg","楓香 (1).jpg","楓香 (2).jpg","楓香 (3).jpg","楓香 (4).jpg","楓香 (5).jpg","楓香 (6).jpg","楓香 (7).jpg","榕樹 (1).jpg","榕樹 (2).jpg","榕樹 (3).jpg","榕樹 (4).jpg","榕樹 (5).jpg","榴槤 (1).jpg","榴槤 (10).jpg","榴槤 (11).jpg","榴槤 (12).jpg","榴槤 (2).jpg","榴槤 (3).jpg","榴槤 (4).jpg","榴槤 (5).jpg","榴槤 (6).jpg","榴槤 (7).jpg","榴槤 (8).jpg","榴槤 (9).jpg","樟樹 (1).jpg","樟樹 (2).jpg","樟樹 (3).jpg","樟樹 (4).jpg","樟樹 (5).jpg","樹皮 (1).jpg","樹皮 (2).jpg","樹皮 (3).jpg","樹皮 (4).jpg","樹皮 (5).jpg","樹蘭 (1).jpg","樹蘭 (2).jpg","樹蘭 (3).jpg","樹蘭 (4).jpg","樹蘭 (5).jpg","檸檬 (1).jpg","檸檬 (10).jpg","檸檬 (11).jpg","檸檬 (12).jpg","檸檬 (13).jpg","檸檬 (14).jpg","檸檬 (2).jpg","檸檬 (3).jpg","檸檬 (4).jpg","檸檬 (5).jpg","檸檬 (6).jpg","檸檬 (7).jpg","檸檬 (8).jpg","檸檬 (9).jpg","櫻花 (1).jpg","櫻花 (10).jpg","櫻花 (11).jpg","櫻花 (12).jpg","櫻花 (13).jpg","櫻花 (14).jpg","櫻花 (2).jpg","櫻花 (3).jpg","櫻花 (4).jpg","櫻花 (5).jpg","櫻花 (6).jpg","櫻花 (7).jpg","櫻花 (8).jpg","櫻花 (9).jpg","欖仁樹 (1).jpg","欖仁樹 (2).jpg","欖仁樹 (3).jpg","欖仁樹 (4).jpg","欖仁樹 (5).jpg","毬蘭 (1).jpg","毬蘭 (2).jpg","毬蘭 (3).jpg","毬蘭 (4).jpg","毬蘭 (5).jpg","毬蘭 (6).jpg","毬蘭 (7).jpg","水仙 (1).jpg","水仙 (2).jpg","水仙 (3).jpg","水仙 (4).jpg","水仙 (5).jpg","水苔 (1).jpg","水苔 (2).jpg","波羅蜜 (1).jpg","波羅蜜 (2).jpg","波羅蜜 (3).jpg","波羅蜜 (4).jpg","波羅蜜 (5).jpg","波羅蜜 (6).jpg","洋桔梗 (1).jpg","洋桔梗 (2).jpg","洋繡球（繡球花） (1).jpg","洋繡球（繡球花） (2).jpg","洋繡球（繡球花） (3).jpg","洋繡球（繡球花） (4).jpg","洋繡球（繡球花） (5).jpg","洋繡球（繡球花） (6).jpg","洋繡球（繡球花） (7).jpg","洋繡球（繡球花） (8).jpg","洋繡球（繡球花） (9).jpg","洋菇 (1).jpg","洋菇 (2).jpg","洋菇 (3).jpg","洋菇 (4).jpg","洋蔥 (1).jpg","洋蔥 (10).jpg","洋蔥 (11).jpg","洋蔥 (2).jpg","洋蔥 (3).jpg","洋蔥 (4).jpg","洋蔥 (5).jpg","洋蔥 (6).jpg","洋蔥 (7).jpg","洋蔥 (8).jpg","洋蔥 (9).jpg","海芋 (1).jpg","海芋 (2).jpg","海芋 (3).jpg","滿天星 (1).jpg","滿天星 (2).jpg","滿天星 (3).jpg","滿天星 (4).jpg","火焰木 (1).jpg","火焰木 (2).jpg","火焰木 (3).jpg","火焰木 (4).jpg","火焰木 (5).jpg","火鶴花 (1).jpg","火鶴花 (2).jpg","火鶴花 (3).jpg","火鶴花 (4).jpg","火鶴花 (5).jpg","火鶴花 (6).jpg","火鶴花 (7).jpg","火鶴花 (8).jpg","火龍果（紅龍果） (1).jpg","火龍果（紅龍果） (10).jpg","火龍果（紅龍果） (11).jpg","火龍果（紅龍果） (12).jpg","火龍果（紅龍果） (13).jpg","火龍果（紅龍果） (2).jpg","火龍果（紅龍果） (3).jpg","火龍果（紅龍果） (4).jpg","火龍果（紅龍果） (5).jpg","火龍果（紅龍果） (6).jpg","火龍果（紅龍果） (7).jpg","火龍果（紅龍果） (8).jpg","火龍果（紅龍果） (9).jpg","炮仗花 (1).jpg","炮仗花 (10).jpg","炮仗花 (11).jpg","炮仗花 (12).jpg","炮仗花 (2).jpg","炮仗花 (3).jpg","炮仗花 (4).jpg","炮仗花 (5).jpg","炮仗花 (6).jpg","炮仗花 (7).jpg","炮仗花 (8).jpg","炮仗花 (9).jpg","爬牆虎（地錦） (1).jpg","爬牆虎（地錦） (2).jpg","爬牆虎（地錦） (3).jpg","爬牆虎（地錦） (4).jpg","爬牆虎（地錦） (5).jpg","爬牆虎（地錦） (6).jpg","牛蒡 (1).jpg","牛蒡 (2).jpg","牛蒡 (3).jpg","牛蒡 (4).jpg","牛蒡 (5).jpg","牽牛花 (1).jpg","牽牛花 (2).jpg","牽牛花 (3).jpg","牽牛花 (4).jpg","牽牛花 (5).jpg","牽牛花 (6).jpg","牽牛花 (7).jpg","獼猴桃（奇異果） (1).jpg","獼猴桃（奇異果） (10).jpg","獼猴桃（奇異果） (11).jpg","獼猴桃（奇異果） (12).jpg","獼猴桃（奇異果） (13).jpg","獼猴桃（奇異果） (14).jpg","獼猴桃（奇異果） (15).jpg","獼猴桃（奇異果） (16).jpg","獼猴桃（奇異果） (17).jpg","獼猴桃（奇異果） (18).jpg","獼猴桃（奇異果） (2).jpg","獼猴桃（奇異果） (3).jpg","獼猴桃（奇異果） (4).jpg","獼猴桃（奇異果） (5).jpg","獼猴桃（奇異果） (6).jpg","獼猴桃（奇異果） (7).jpg","獼猴桃（奇異果） (8).jpg","獼猴桃（奇異果） (9).jpg","玫瑰（玫瑰花） (1).jpg","玫瑰（玫瑰花） (2).jpg","玫瑰（玫瑰花） (3).jpg","玫瑰（玫瑰花） (4).jpg","玫瑰（玫瑰花） (5).jpg","玫瑰（玫瑰花） (6).jpg","玫瑰（玫瑰花） (7).jpg","玫瑰（玫瑰花） (8).jpg","珊瑚藤 (1).jpg","珊瑚藤 (2).jpg","珊瑚藤 (3).jpg","珊瑚藤 (4).jpg","珊瑚藤 (5).jpg","球莖甘藍 (1).jpg","球莖甘藍 (10).jpg","球莖甘藍 (2).jpg","球莖甘藍 (3).jpg","球莖甘藍 (4).jpg","球莖甘藍 (5).jpg","球莖甘藍 (6).jpg","球莖甘藍 (7).jpg","球莖甘藍 (8).jpg","球莖甘藍 (9).jpg","甘藍（高麗菜） (1).jpg","甘藍（高麗菜） (2).jpg","甘藍（高麗菜） (3).jpg","甘藍（高麗菜） (4).jpg","甘藍（高麗菜） (5).jpg","甘藍（高麗菜） (6).jpg","甘藍（高麗菜） (7).jpg","甘藍（高麗菜） (8).jpg","甜椒 (1).jpg","甜椒 (10).jpg","甜椒 (11).jpg","甜椒 (12).jpg","甜椒 (13).jpg","甜椒 (14).jpg","甜椒 (15).jpg","甜椒 (16).jpg","甜椒 (17).jpg","甜椒 (18).jpg","甜椒 (19).jpg","甜椒 (2).jpg","甜椒 (20).jpg","甜椒 (21).jpg","甜椒 (22).jpg","甜椒 (23).jpg","甜椒 (24).jpg","甜椒 (25).jpg","甜椒 (26).jpg","甜椒 (3).jpg","甜椒 (4).jpg","甜椒 (5).jpg","甜椒 (6).jpg","甜椒 (7).jpg","甜椒 (8).jpg","甜椒 (9).jpg","甜瓜（香瓜） (1).jpg","甜瓜（香瓜） (10).jpg","甜瓜（香瓜） (11).jpg","甜瓜（香瓜） (12).jpg","甜瓜（香瓜） (13).jpg","甜瓜（香瓜） (2).jpg","甜瓜（香瓜） (3).jpg","甜瓜（香瓜） (4).jpg","甜瓜（香瓜） (5).jpg","甜瓜（香瓜） (6).jpg","甜瓜（香瓜） (7).jpg","甜瓜（香瓜） (8).jpg","甜瓜（香瓜） (9).jpg","田字草 (1).jpg","田字草 (2).jpg","田字草 (3).jpg","田字草 (4).jpg","田字草 (5).jpg","番石榴 (1).jpg","番石榴 (10).jpg","番石榴 (11).jpg","番石榴 (2).jpg","番石榴 (3).jpg","番石榴 (4).jpg","番石榴 (5).jpg","番石榴 (6).jpg","番石榴 (7).jpg","番石榴 (8).jpg","番石榴 (9).jpg","番茄 (1).jpg","番茄 (10).jpg","番茄 (11).jpg","番茄 (12).jpg","番茄 (13).jpg","番茄 (14).jpg","番茄 (15).jpg","番茄 (16).jpg","番茄 (17).jpg","番茄 (18).jpg","番茄 (19).jpg","番茄 (2).jpg","番茄 (3).jpg","番茄 (4).jpg","番茄 (5).jpg","番茄 (6).jpg","番茄 (7).jpg","番茄 (8).jpg","番茄 (9).jpg","發泡煉石 (1).jpg","發泡煉石 (2).jpg","白千層 (1).jpg","白千層 (2).jpg","白千層 (3).jpg","白千層 (4).jpg","白千層 (5).jpg","白千層 (6).jpg","白千層 (7).jpg","白木耳 (1).jpg","白木耳 (2).jpg","白木耳 (3).jpg","白木耳 (4).jpg","白木耳 (5).jpg","白木耳 (6).jpg","白木耳 (7).jpg","白雪木 (1).jpg","白雪木 (2).jpg","白雪木 (3).jpg","白雪木 (4).jpg","白雪木 (5).jpg","百合 (1).jpg","百合 (2).jpg","百合 (3).jpg","百合 (4).jpg","百合 (5).jpg","百合 (6).jpg","百日草 (1).jpg","百日草 (2).jpg","百日草 (3).jpg","百日草 (4).jpg","百日草 (5).jpg","百香果 (1).jpg","百香果 (2).jpg","百香果 (3).jpg","百香果 (4).jpg","百香果 (5).jpg","百香果 (6).jpg","百香果 (7).jpg","百香果 (8).jpg","百香果 (9).jpg","盆花端盤 (1).jpg","盆花端盤 (2).jpg","盆花端盤 (3).jpg","盆花端盤 (4).jpg","盆花端盤 (5).jpg","盆花端盤 (6).jpg","盆花端盤 (7).jpg","相思樹 (1).jpg","相思樹 (2).jpg","相思樹 (3).jpg","相思樹 (4).jpg","相思樹 (5).jpg","真珠石（珍珠石） (1).jpg","真珠石（珍珠石） (2).jpg","睡蓮 (1).jpg","睡蓮 (2).jpg","睡蓮 (3).jpg","睡蓮 (4).jpg","睡蓮 (5).jpg","睡蓮 (6).jpg","睡蓮 (7).jpg","睡蓮 (8).jpg","矮牽牛 (1).jpg","矮牽牛 (2).jpg","矮牽牛 (3).jpg","矮牽牛 (4).jpg","矮牽牛 (5).jpg","石竹 (1).jpg","石竹 (2).jpg","石竹 (3).jpg","石竹 (4).jpg","福建茶（小葉厚殼樹） (1).jpg","福建茶（小葉厚殼樹） (2).jpg","福建茶（小葉厚殼樹） (3).jpg","福建茶（小葉厚殼樹） (4).jpg","福建茶（小葉厚殼樹） (5).jpg","福祿桐 (1).jpg","福祿桐 (2).jpg","福祿桐 (3).jpg","福祿桐 (4).jpg","福祿桐 (5).jpg","福祿桐 (6).jpg","秋石斛蘭（秋石斛） (1).jpg","秋石斛蘭（秋石斛） (2).jpg","秋石斛蘭（秋石斛） (3).jpg","移植袋 (1).jpg","移植袋 (2).jpg","移植袋 (3).jpg","移植鏝 (1).jpg","移植鏝 (2).jpg","稻殼 (1).jpg","稻殼 (2).jpg","穴盤 (1).jpg","穴盤 (2).jpg","穴盤 (3).jpg","立式容器 (1).jpg","立式容器 (2).jpg","竹筍 (1).jpg","竹筍 (10).jpg","竹筍 (11).jpg","竹筍 (12).jpg","竹筍 (13).jpg","竹筍 (2).jpg","竹筍 (3).jpg","竹筍 (4).jpg","竹筍 (5).jpg","竹筍 (6).jpg","竹筍 (7).jpg","竹筍 (8).jpg","竹筍 (9).jpg","竹芋 (1).jpg","竹芋 (2).jpg","竹芋 (3).jpg","竹芋 (4).jpg","管夾 (1).jpg","管夾 (2).jpg","管夾 (3).jpg","粉萼鼠尾草 (1).jpg","粉萼鼠尾草 (2).jpg","粉萼鼠尾草 (3).jpg","粉萼鼠尾草 (4).jpg","粉萼鼠尾草 (5).jpg","粉萼鼠尾草 (6).jpg","粉萼鼠尾草 (7).jpg","糖度計 (1).jpg","糖度計 (2).jpg","糖度計 (3).jpg","糖度計 (4).jpg","糖度計 (5).jpg","紅毛丹 (1).jpg","紅毛丹 (2).jpg","紅毛丹 (3).jpg","紅毛丹 (4).jpg","紅毛丹 (5).jpg","紅毛丹 (6).jpg","紅鳳菜 (1).jpg","紅鳳菜 (2).jpg","紅鳳菜 (3).jpg","紅鳳菜 (4).jpg","紅鳳菜 (5).jpg","紙莎草 (1).jpg","紙莎草 (2).jpg","紙莎草 (3).jpg","紙莎草 (4).jpg","素燒盆 (1).jpg","素燒盆 (2).jpg","紫藤 (1).jpg","紫藤 (2).jpg","紫藤 (3).jpg","紫藤 (4).jpg","紫藤 (5).jpg","細葉雪茄花 (1).jpg","細葉雪茄花 (2).jpg","細葉雪茄花 (3).jpg","細葉雪茄花 (4).jpg","細葉雪茄花 (5).jpg","絲瓜 (1).jpg","絲瓜 (10).jpg","絲瓜 (2).jpg","絲瓜 (3).jpg","絲瓜 (4).jpg","絲瓜 (5).jpg","絲瓜 (6).jpg","絲瓜 (7).jpg","絲瓜 (8).jpg","絲瓜 (9).jpg","綠海綿 (1).jpg","綠海綿 (2).jpg","綠海綿 (3).jpg","緬梔（雞蛋花） (1).jpg","緬梔（雞蛋花） (2).jpg","緬梔（雞蛋花） (3).jpg","緬梔（雞蛋花） (4).jpg","緬梔（雞蛋花） (5).jpg","緬梔（雞蛋花） (6).jpg","緬梔（雞蛋花） (7).jpg","繁星花 (1).jpg","繁星花 (2).jpg","繁星花 (3).jpg","繁星花 (4).jpg","繁星花 (5).jpg","繁星花 (6).jpg","繁星花 (7).jpg","繁星花 (8).jpg","繁星花 (9).jpg","美人樹 (1).jpg","美人樹 (2).jpg","美人樹 (3).jpg","美人樹 (4).jpg","美人樹 (5).jpg","美人蕉 (1).jpg","美人蕉 (2).jpg","美人蕉 (3).jpg","美人蕉 (4).jpg","美人蕉 (5).jpg","美人蕉 (6).jpg","羽扇豆（魯冰花）.jpg","翼豆（四角豆） (1).jpg","翼豆（四角豆） (2).jpg","翼豆（四角豆） (3).jpg","翼豆（四角豆） (4).jpg","翼豆（四角豆） (5).jpg","翼豆（四角豆） (6).jpg","翼豆（四角豆） (7).jpg","翼豆（四角豆） (8).jpg","聖誕紅 (1).jpg","聖誕紅 (2).jpg","聖誕紅 (3).jpg","聖誕紅 (4).jpg","聖誕紅 (5).jpg","肯氏南洋杉 (1).jpg","肯氏南洋杉 (2).jpg","肯氏南洋杉 (3).jpg","肯氏南洋杉 (4).jpg","肯氏南洋杉 (5).jpg","胡椒木 (1).jpg","胡椒木 (2).jpg","胡椒木 (3).jpg","胡椒木 (4).jpg","胡椒木 (5).jpg","胡瓜 (1).jpg","胡瓜 (2).jpg","胡瓜 (3).jpg","胡瓜 (4).jpg","胡瓜 (5).jpg","胡瓜 (6).jpg","胡瓜 (7).jpg","胡瓜 (8).jpg","胡瓜 (9).jpg","胡蘿蔔 (1).jpg","胡蘿蔔 (2).jpg","胡蘿蔔 (3).jpg","胡蘿蔔 (4).jpg","胡蘿蔔 (5).jpg","胡蘿蔔 (6).jpg","胡蘿蔔 (7).jpg","胡蘿蔔 (8).jpg","胡蘿蔔 (9).jpg","腎藥蘭 (1).jpg","腎藥蘭 (2).jpg","腎藥蘭 (3).jpg","腎藥蘭 (4).jpg","腎藥蘭 (5).jpg","腎藥蘭 (6).jpg","芋頭（芋） (1).jpg","芋頭（芋） (2).jpg","芋頭（芋） (3).jpg","芋頭（芋） (4).jpg","芋頭（芋） (5).jpg","芋頭（芋） (6).jpg","芋頭（芋） (7).jpg","芋頭（芋） (8).jpg","芒果（檬果） (1).jpg","芒果（檬果） (10).jpg","芒果（檬果） (11).jpg","芒果（檬果） (12).jpg","芒果（檬果） (13).jpg","芒果（檬果） (14).jpg","芒果（檬果） (2).jpg","芒果（檬果） (3).jpg","芒果（檬果） (4).jpg","芒果（檬果） (5).jpg","芒果（檬果） (6).jpg","芒果（檬果） (7).jpg","芒果（檬果） (8).jpg","芒果（檬果） (9).jpg","芥藍 (1).jpg","芥藍 (2).jpg","芥藍 (3).jpg","芥藍 (4).jpg","芥藍 (5).jpg","芥藍 (6).jpg","芥藍 (7).jpg","芫荽 (1).jpg","芫荽 (2).jpg","芫荽 (3).jpg","芫荽 (4).jpg","芫荽 (5).jpg","芫荽 (6).jpg","花椰菜 (1).jpg","花椰菜 (2).jpg","花椰菜 (3).jpg","花椰菜 (4).jpg","花椰菜 (5).jpg","花椰菜 (6).jpg","花椰菜 (7).jpg","花椰菜 (8).jpg","花椰菜 (9).jpg","芹菜 (1).jpg","芹菜 (2).jpg","芹菜 (3).jpg","芹菜 (4).jpg","芹菜 (5).jpg","芹菜 (6).jpg","芹菜 (7).jpg","芹菜 (8).jpg","芹菜 (9).jpg","芽接刀 (1).jpg","芽接刀 (2).jpg","苦楝 (1).jpg","苦楝 (2).jpg","苦楝 (3).jpg","苦楝 (4).jpg","苦楝 (5).jpg","苦楝 (6).jpg","苦楝 (7).jpg","苦瓜 (1).jpg","苦瓜 (10).jpg","苦瓜 (11).jpg","苦瓜 (2).jpg","苦瓜 (3).jpg","苦瓜 (4).jpg","苦瓜 (5).jpg","苦瓜 (6).jpg","苦瓜 (7).jpg","苦瓜 (8).jpg","苦瓜 (9).jpg","茄子 (1).jpg","茄子 (10).jpg","茄子 (11).jpg","茄子 (12).jpg","茄子 (13).jpg","茄子 (14).jpg","茄子 (2).jpg","茄子 (3).jpg","茄子 (4).jpg","茄子 (5).jpg","茄子 (6).jpg","茄子 (7).jpg","茄子 (8).jpg","茄子 (9).jpg","茄苳（重陽木） (1).jpg","茄苳（重陽木） (2).jpg","茄苳（重陽木） (3).jpg","茄苳（重陽木） (4).jpg","茄苳（重陽木） (5).jpg","茄苳（重陽木） (6).jpg","茉莉花 (1).jpg","茉莉花 (2).jpg","茉莉花 (3).jpg","茉莉花 (4).jpg","茉莉花 (5).jpg","茉莉花 (6).jpg","茭白 (茭白筍） (1).jpg","茭白 (茭白筍） (2).jpg","茭白 (茭白筍） (3).jpg","茭白 (茭白筍） (4).jpg","茭白 (茭白筍） (5).jpg","茶花 (1).jpg","茶花 (2).jpg","茶花 (3).jpg","茶花 (4).jpg","茶花 (5).jpg","茼蒿 (1).jpg","茼蒿 (2).jpg","茼蒿 (3).jpg","茼蒿 (4).jpg","茼蒿 (5).jpg","茼蒿 (6).jpg","茼蒿 (7).jpg","草莓 (1).jpg","草莓 (10).jpg","草莓 (2).jpg","草莓 (3).jpg","草莓 (4).jpg","草莓 (5).jpg","草莓 (6).jpg","草莓 (7).jpg","草莓 (8).jpg","草莓 (9).jpg","荔枝 (1).jpg","荔枝 (10).jpg","荔枝 (11).jpg","荔枝 (12).jpg","荔枝 (13).jpg","荔枝 (14).jpg","荔枝 (15).jpg","荔枝 (16).jpg","荔枝 (2).jpg","荔枝 (3).jpg","荔枝 (4).jpg","荔枝 (5).jpg","荔枝 (6).jpg","荔枝 (7).jpg","荔枝 (8).jpg","荔枝 (9).jpg","荷花（蓮花） (1).jpg","荷花（蓮花） (10).jpg","荷花（蓮花） (11).jpg","荷花（蓮花） (12).jpg","荷花（蓮花） (13).jpg","荷花（蓮花） (14).jpg","荷花（蓮花） (15).jpg","荷花（蓮花） (2).jpg","荷花（蓮花） (3).jpg","荷花（蓮花） (4).jpg","荷花（蓮花） (5).jpg","荷花（蓮花） (6).jpg","荷花（蓮花） (7).jpg","荷花（蓮花） (8).jpg","荷花（蓮花） (9).jpg","莧菜 (1).jpg","莧菜 (2).jpg","莧菜 (3).jpg","莧菜 (4).jpg","莧菜 (5).jpg","莧菜 (6).jpg","莧菜 (7).jpg","菊花 (1).jpg","菊花 (2).jpg","菊花 (3).jpg","菊花 (4).jpg","菊花 (5).jpg","菊花 (6).jpg","菊花 (7).jpg","菠菜 (1).jpg","菠菜 (2).jpg","菠菜 (3).jpg","菠菜 (4).jpg","菠菜 (5).jpg","菠菜 (6).jpg","菱角 (1).jpg","菱角 (2).jpg","菱角 (3).jpg","菱角 (4).jpg","菱角 (5).jpg","菾菜 (1).jpg","菾菜 (2).jpg","菾菜 (3).jpg","菾菜 (4).jpg","菾菜 (5).jpg","菾菜 (6).jpg","萊姆 (1).jpg","萊姆 (2).jpg","萊姆 (3).jpg","萊姆 (4).jpg","萊豆（皇帝豆） (1).jpg","萊豆（皇帝豆） (10).jpg","萊豆（皇帝豆） (2).jpg","萊豆（皇帝豆） (3).jpg","萊豆（皇帝豆） (4).jpg","萊豆（皇帝豆） (5).jpg","萊豆（皇帝豆） (6).jpg","萊豆（皇帝豆） (7).jpg","萊豆（皇帝豆） (8).jpg","萊豆（皇帝豆） (9).jpg","萬代蘭 (1).jpg","萬代蘭 (2).jpg","萬代蘭 (3).jpg","萬代蘭 (4).jpg","萬代蘭 (5).jpg","萬代蘭 (6).jpg","落葵（皇宮菜） (1).jpg","落葵（皇宮菜） (2).jpg","落葵（皇宮菜） (3).jpg","落葵（皇宮菜） (4).jpg","落葵（皇宮菜） (5).jpg","落葵（皇宮菜） (6).jpg","葉用甘藷 (1).jpg","葉用甘藷 (2).jpg","葉用甘藷 (3).jpg","葉用甘藷 (4).jpg","葉用甘藷 (5).jpg","葉萵苣（萵仔菜） (1).jpg","葉萵苣（萵仔菜） (10).jpg","葉萵苣（萵仔菜） (11).jpg","葉萵苣（萵仔菜） (12).jpg","葉萵苣（萵仔菜） (2).jpg","葉萵苣（萵仔菜） (3).jpg","葉萵苣（萵仔菜） (4).jpg","葉萵苣（萵仔菜） (5).jpg","葉萵苣（萵仔菜） (6).jpg","葉萵苣（萵仔菜） (7).jpg","葉萵苣（萵仔菜） (8).jpg","葉萵苣（萵仔菜） (9).jpg","葡萄 (1).jpg","葡萄 (2).jpg","葡萄 (3).jpg","葡萄 (4).jpg","葡萄 (5).jpg","蒜香藤 (1).jpg","蒜香藤 (2).jpg","蒜香藤 (3).jpg","蒜香藤 (4).jpg","蒜香藤 (5).jpg","蒜香藤 (6).jpg","蒜香藤 (7).jpg","蒜香藤 (8).jpg","蒜香藤 (9).jpg","蓮藕 (1).jpg","蓮藕 (2).jpg","蓮藕 (3).jpg","蓮藕 (4).jpg","蓮藕 (5).jpg","蓮藕 (6).jpg","蓮藕 (7).jpg","蓮藕 (8).jpg","蓮霧 (1).jpg","蓮霧 (10).jpg","蓮霧 (11).jpg","蓮霧 (12).jpg","蓮霧 (13).jpg","蓮霧 (14).jpg","蓮霧 (2).jpg","蓮霧 (3).jpg","蓮霧 (4).jpg","蓮霧 (5).jpg","蓮霧 (6).jpg","蓮霧 (7).jpg","蓮霧 (8).jpg","蓮霧 (9).jpg","蔥 (1).jpg","蔥 (2).jpg","蔥 (3).jpg","蔥 (4).jpg","蔥 (5).jpg","蔥 (6).jpg","蕹菜（空心菜） (1).jpg","蕹菜（空心菜） (2).jpg","蕹菜（空心菜） (3).jpg","蕹菜（空心菜） (4).jpg","蕹菜（空心菜） (5).jpg","蕹菜（空心菜） (6).jpg","蕹菜（空心菜） (7).jpg","蕹菜（空心菜） (8).jpg","薑 (1).jpg","薑 (2).jpg","薑 (3).jpg","薑 (4).jpg","薑 (5).jpg","薑 (6).jpg","薑荷花 (1).jpg","薑荷花 (2).jpg","薜荔 (1).jpg","薜荔 (2).jpg","薜荔 (3).jpg","薜荔 (4).jpg","薜荔 (5).jpg","薰衣草 (1).jpg","薰衣草 (2).jpg","薰衣草 (3).jpg","薰衣草 (4).jpg","薰衣草 (5).jpg","藍花楹 (1).jpg","藍花楹 (2).jpg","藍花楹 (3).jpg","藍花楹 (4).jpg","藍花楹 (5).jpg","蘆筍 (1).jpg","蘆筍 (2).jpg","蘆筍 (3).jpg","蘆筍 (4).jpg","蘆筍 (5).jpg","蘆筍 (6).jpg","蘇鐵 (1).jpg","蘇鐵 (2).jpg","蘇鐵 (3).jpg","蘇鐵 (4).jpg","蘇鐵 (5).jpg","蘇鐵 (6).jpg","蘇鐵 (7).jpg","蘋果 (1).jpg","蘋果 (10).jpg","蘋果 (11).jpg","蘋果 (12).jpg","蘋果 (2).jpg","蘋果 (3).jpg","蘋果 (4).jpg","蘋果 (5).jpg","蘋果 (6).jpg","蘋果 (7).jpg","蘋果 (8).jpg","蘋果 (9).jpg","蘿蔔 (1).jpg","蘿蔔 (2).jpg","蘿蔔 (3).jpg","蘿蔔 (4).jpg","蘿蔔 (5).jpg","虎尾蘭 (1).jpg","虎尾蘭 (2).jpg","虎尾蘭 (3).jpg","虎尾蘭 (4).jpg","蛇木 (1).jpg","蛇木 (2).jpg","蛇木 (3).jpg","蛭石 (1).jpg","蛭石 (2).jpg","蜀葵 (1).jpg","蜀葵 (2).jpg","蜀葵 (3).jpg","蝦蟆秋海棠 (1).jpg","蝦蟆秋海棠 (2).jpg","蝦蟆秋海棠 (3).jpg","蝴蝶蘭 (1).jpg","蝴蝶蘭 (10).jpg","蝴蝶蘭 (11).jpg","蝴蝶蘭 (12).jpg","蝴蝶蘭 (2).jpg","蝴蝶蘭 (3).jpg","蝴蝶蘭 (4).jpg","蝴蝶蘭 (5).jpg","蝴蝶蘭 (6).jpg","蝴蝶蘭 (7).jpg","蝴蝶蘭 (8).jpg","蝴蝶蘭 (9).jpg","西洋白花菜（醉蝶花） (1).jpg","西洋白花菜（醉蝶花） (2).jpg","西瓜 (1).jpg","西瓜 (10).jpg","西瓜 (11).jpg","西瓜 (2).jpg","西瓜 (3).jpg","西瓜 (4).jpg","西瓜 (5).jpg","西瓜 (6).jpg","西瓜 (7).jpg","西瓜 (8).jpg","西瓜 (9).jpg","觀賞鳳梨 (1).jpg","觀賞鳳梨 (2).jpg","觀賞鳳梨 (3).jpg","觀賞鳳梨 (4).jpg","觀賞鳳梨 (5).jpg","觀賞鳳梨 (6).jpg","誘蟲盒 (1).jpg","誘蟲盒 (2).jpg","誘蟲盒 (3).jpg","誘蟲盒 (4).jpg","誘蟲黏板 (1).jpg","誘蟲黏板 (2).jpg","誘蟲黏板 (3).jpg","誘蟲黏板 (4).jpg","誘蟲黏板 (5).jpg","誘蟲黏板 (6).jpg","變葉木 (1).jpg","變葉木 (2).jpg","變葉木 (3).jpg","變葉木 (4).jpg","豇豆 (1).jpg","豇豆 (2).jpg","豇豆 (3).jpg","豇豆 (4).jpg","豇豆 (5).jpg","豇豆 (6).jpg","豇豆 (7).jpg","豇豆 (8).jpg","豌豆（荷蘭豆） (1).jpg","豌豆（荷蘭豆） (10).jpg","豌豆（荷蘭豆） (11).jpg","豌豆（荷蘭豆） (12).jpg","豌豆（荷蘭豆） (13).jpg","豌豆（荷蘭豆） (14).jpg","豌豆（荷蘭豆） (15).jpg","豌豆（荷蘭豆） (16).jpg","豌豆（荷蘭豆） (17).jpg","豌豆（荷蘭豆） (2).jpg","豌豆（荷蘭豆） (3).jpg","豌豆（荷蘭豆） (4).jpg","豌豆（荷蘭豆） (5).jpg","豌豆（荷蘭豆） (6).jpg","豌豆（荷蘭豆） (7).jpg","豌豆（荷蘭豆） (8).jpg","豌豆（荷蘭豆） (9).jpg","豔紫荆 (1).jpg","豔紫荆 (2).jpg","豔紫荆 (3).jpg","豔紫荆 (4).jpg","豔紫荆 (5).jpg","豬籠草 (1).jpg","豬籠草 (2).jpg","豬籠草 (3).jpg","赤玉土 (1).jpg","赤玉土 (2).jpg","赫蕉 (1).jpg","赫蕉 (2).jpg","赫蕉 (3).jpg","赫蕉 (4).jpg","赫蕉 (5).jpg","赫蕉 (6).jpg","軟枝黃蟬 (1).jpg","軟枝黃蟬 (2).jpg","軟枝黃蟬 (3).jpg","軟枝黃蟬 (4).jpg","軟枝黃蟬 (5).jpg","輪傘莎草 (1).jpg","輪傘莎草 (2).jpg","輪傘莎草 (3).jpg","輪傘莎草 (4).jpg","輪傘莎草 (5).jpg","輪傘莎草 (6).jpg","輪傘莎草 (7).jpg","辣椒 (1).jpg","辣椒 (2).jpg","辣椒 (3).jpg","辣椒 (4).jpg","辣椒 (5).jpg","辣椒 (6).jpg","辣椒 (7).jpg","辣椒 (8).jpg","辣椒 (9).jpg","選果機.jpg","酪梨 (1).jpg","酪梨 (2).jpg","酪梨 (3).jpg","酪梨 (4).jpg","酪梨 (5).jpg","酪梨 (6).jpg","酪梨 (7).jpg","酸鹼值測定器（pH值測定器） (1).jpg","酸鹼值測定器（pH值測定器） (2).jpg","酸鹼值測定器（pH值測定器） (3).jpg","酸鹼值測定器（pH值測定器） (4).jpg","釋迦（番荔枝） (1).jpg","釋迦（番荔枝） (10).jpg","釋迦（番荔枝） (11).jpg","釋迦（番荔枝） (12).jpg","釋迦（番荔枝） (13).jpg","釋迦（番荔枝） (14).jpg","釋迦（番荔枝） (15).jpg","釋迦（番荔枝） (16).jpg","釋迦（番荔枝） (17).jpg","釋迦（番荔枝） (2).jpg","釋迦（番荔枝） (3).jpg","釋迦（番荔枝） (4).jpg","釋迦（番荔枝） (5).jpg","釋迦（番荔枝） (6).jpg","釋迦（番荔枝） (7).jpg","釋迦（番荔枝） (8).jpg","釋迦（番荔枝） (9).jpg","野牡丹 (1).jpg","野牡丹 (2).jpg","野牡丹 (3).jpg","野牡丹 (4).jpg","野牡丹 (5).jpg","野牡丹 (6).jpg","野薑花 (1).jpg","野薑花 (2).jpg","野薑花 (3).jpg","野薑花 (4).jpg","野薑花 (5).jpg","金柑 (1).jpg","金柑 (2).jpg","金柑 (3).jpg","金柑 (4).jpg","金柑 (5).jpg","金盞花 (1).jpg","金盞花 (2).jpg","金盞花 (3).jpg","金盞花 (4).jpg","金花石蒜 (1).jpg","金花石蒜 (2).jpg","金花石蒜 (3).jpg","金花石蒜 (4).jpg","金花石蒜 (5).jpg","金蓮花 (1).jpg","金蓮花 (2).jpg","金蓮花 (3).jpg","金針菇 (1).jpg","金針菇 (2).jpg","金針菇 (3).jpg","金針菇 (4).jpg","金針菇 (5).jpg","金針菇 (6).jpg","金針菜 (1).jpg","金針菜 (2).jpg","金針菜 (3).jpg","金針菜 (4).jpg","金針菜 (5).jpg","金針菜 (6).jpg","金露花 (1).jpg","金露花 (2).jpg","金露花 (3).jpg","金露花 (4).jpg","金露花 (5).jpg","金魚草 (1).jpg","金魚草 (2).jpg","金魚草 (3).jpg","銀黑色塑膠布 (1).jpg","銀黑色塑膠布 (2).jpg","銀黑色塑膠布 (3).jpg","銀黑色塑膠布 (4).jpg","銅錢草（錢幣草） (1).jpg","銅錢草（錢幣草） (2).jpg","銅錢草（錢幣草） (3).jpg","錏管 (1).jpg","錏管 (2).jpg","錏管 (3).jpg","錦屏藤 (1).jpg","錦屏藤 (2).jpg","錦屏藤 (3).jpg","錦屏藤 (4).jpg","錦屏藤 (5).jpg","錫葉藤 (1).jpg","錫葉藤 (2).jpg","錫葉藤 (3).jpg","錫葉藤 (4).jpg","錫葉藤 (5).jpg","錫蘭葉下珠 (1).jpg","錫蘭葉下珠 (2).jpg","錫蘭葉下珠 (3).jpg","錫蘭葉下珠 (4).jpg","錫蘭葉下珠 (5).jpg","鐮刀 (1).jpg","鐮刀 (2).jpg","鐮刀 (3).jpg","鐮刀 (4).jpg","長壽花 (1).jpg","長壽花 (2).jpg","長壽花 (3).jpg","長壽花 (4).jpg","長春花（日日春） (1).jpg","長春花（日日春） (2).jpg","長春花（日日春） (3).jpg","長春花（日日春） (4).jpg","防蟲網 (1).jpg","防蟲網 (2).jpg","防蟲網 (3).jpg","阿勃勒 (1).jpg","阿勃勒 (2).jpg","阿勃勒 (3).jpg","阿勃勒 (4).jpg","阿勃勒 (5).jpg","阿勃勒 (6).jpg","阿勃勒 (7).jpg","阿勃勒 (8).jpg","除刺器 (1).jpg","除刺器 (2).jpg","除刺器 (3).jpg","除刺器 (4).jpg","除刺器 (5).jpg","雜草抑制蓆 (1).jpg","雜草抑制蓆 (2).jpg","雜草抑制蓆 (3).jpg","雜草抑制蓆 (4).jpg","雜草抑制蓆 (5).jpg","雞冠花 (1).jpg","雞冠花 (2).jpg","雞冠花 (3).jpg","雞冠花 (4).jpg","雞冠花 (5).jpg","雞冠花 (6).jpg","青梗白菜（青江菜） (1).jpg","青梗白菜（青江菜） (2).jpg","青梗白菜（青江菜） (3).jpg","青梗白菜（青江菜） (4).jpg","青梗白菜（青江菜） (5).jpg","青梗白菜（青江菜） (6).jpg","青花菜 (1).jpg","青花菜 (2).jpg","青花菜 (3).jpg","青花菜 (4).jpg","青花菜 (5).jpg","青花菜 (6).jpg","青花菜 (7).jpg","青花菜 (8).jpg","青花菜 (9).jpg","非洲堇 (1).jpg","非洲堇 (2).jpg","非洲堇 (3).jpg","非洲菊 (1).jpg","非洲菊 (2).jpg","非洲菊 (3).jpg","非洲菊 (4).jpg","非洲菊 (5).jpg","非洲菊 (6).jpg","非洲鳳仙（花） (1).jpg","非洲鳳仙（花） (2).jpg","非洲鳳仙（花） (3).jpg","非洲鳳仙（花） (4).jpg","非洲鳳仙（花） (5).jpg","韭菜 (1).jpg","韭菜 (10).jpg","韭菜 (11).jpg","韭菜 (2).jpg","韭菜 (3).jpg","韭菜 (4).jpg","韭菜 (5).jpg","韭菜 (6).jpg","韭菜 (7).jpg","韭菜 (8).jpg","韭菜 (9).jpg","韭蘭 (1).jpg","韭蘭 (2).jpg","韭蘭 (3).jpg","韭蘭 (4).jpg","韭蘭 (5).jpg","風鈴木 (1).jpg","風鈴木 (2).jpg","風鈴木 (3).jpg","風鈴木 (4).jpg","風鈴木 (5).jpg","風鈴木 (6).jpg","風鈴木 (7).jpg","香石竹（康乃馨） (1).jpg","香石竹（康乃馨） (2).jpg","香石竹（康乃馨） (3).jpg","香石竹（康乃馨） (4).jpg","香石竹（康乃馨） (5).jpg","香菇 (1).jpg","香菇 (2).jpg","香菇 (3).jpg","香菇 (4).jpg","香菇 (5).jpg","香菇 (6).jpg","香蕉 (1).jpg","香蕉 (10).jpg","香蕉 (11).jpg","香蕉 (12).jpg","香蕉 (13).jpg","香蕉 (14).jpg","香蕉 (15).jpg","香蕉 (16).jpg","香蕉 (17).jpg","香蕉 (18).jpg","香蕉 (2).jpg","香蕉 (3).jpg","香蕉 (4).jpg","香蕉 (5).jpg","香蕉 (6).jpg","香蕉 (7).jpg","香蕉 (8).jpg","香蕉 (9).jpg","馬拉巴栗 (1).jpg","馬拉巴栗 (2).jpg","馬拉巴栗 (3).jpg","馬拉巴栗 (4).jpg","馬拉巴栗 (5).jpg","馬拉巴栗 (6).jpg","馬拉巴栗 (7).jpg","馬纓丹 (1).jpg","馬纓丹 (2).jpg","馬纓丹 (3).jpg","馬纓丹 (4).jpg","馬纓丹 (5).jpg","馬纓丹 (6).jpg","馬纓丹 (7).jpg","馬纓丹 (8).jpg","馬鈴薯 (1).jpg","馬鈴薯 (2).jpg","馬鈴薯 (3).jpg","馬鈴薯 (4).jpg","馬鈴薯 (5).jpg","馬鈴薯 (6).jpg","馬鈴薯 (7).jpg","馬鈴薯 (8).jpg","馬齒牡丹 (1).jpg","馬齒牡丹 (2).jpg","馬齒牡丹 (3).jpg","馬齒牡丹 (4).jpg","馬齒牡丹 (5).jpg","馬齒牡丹 (6).jpg","鳯梨 (1).jpg","鳯梨 (10).jpg","鳯梨 (11).jpg","鳯梨 (12).jpg","鳯梨 (13).jpg","鳯梨 (14).jpg","鳯梨 (2).jpg","鳯梨 (3).jpg","鳯梨 (4).jpg","鳯梨 (5).jpg","鳯梨 (6).jpg","鳯梨 (7).jpg","鳯梨 (8).jpg","鳯梨 (9).jpg","鳳凰木 (1).jpg","鳳凰木 (2).jpg","鳳凰木 (3).jpg","鳳凰木 (4).jpg","鳳凰木 (5).jpg","鳳凰木 (6).jpg","鳶尾 (1).jpg","鳶尾 (2).jpg","鳶尾 (3).jpg","鳶尾 (4).jpg","鳶尾 (5).jpg","鳶尾 (6).jpg","鳶尾 (7).jpg","鵝掌藤 (1).jpg","鵝掌藤 (2).jpg","鵝掌藤 (3).jpg","鵝掌藤 (4).jpg","鵝掌藤 (5).jpg","麥桿菊 (1).jpg","麥桿菊 (2).jpg","麥桿菊 (3).jpg","麥桿菊 (4).jpg","麥桿菊 (5).jpg","麥桿菊 (6).jpg","麥桿菊 (7).jpg","麥桿菊 (8).jpg","麥桿菊 (9).jpg","黃帝菊 (1).jpg","黃帝菊 (2).jpg","黃帝菊 (3).jpg","黃帝菊 (4).jpg","黃帝菊 (5).jpg","黃椰子 (1).jpg","黃椰子 (2).jpg","黃椰子 (3).jpg","黃椰子 (4).jpg","黃椰子 (5).jpg","黃椰子 (6).jpg","黃波斯菊 (1).jpg","黃波斯菊 (2).jpg","黃秋葵 (1).jpg","黃秋葵 (2).jpg","黃秋葵 (3).jpg","黃秋葵 (4).jpg","黃秋葵 (5).jpg","黃秋葵 (6).jpg","黃秋葵 (7).jpg","黃秋葵 (8).jpg","黃秋葵 (9).jpg","黃金果 (1).jpg","黃金果 (10).jpg","黃金果 (11).jpg","黃金果 (12).jpg","黃金果 (2).jpg","黃金果 (3).jpg","黃金果 (4).jpg","黃金果 (5).jpg","黃金果 (6).jpg","黃金果 (7).jpg","黃金果 (8).jpg","黃金果 (9).jpg","黃金葛 (1).jpg","黃金葛 (2).jpg","黃金葛 (3).jpg","黃金葛 (4).jpg","黑木耳 (1).jpg","黑木耳 (2).jpg","黑木耳 (3).jpg","黑木耳 (4).jpg","黑板樹 (1).jpg","黑板樹 (2).jpg","黑板樹 (3).jpg","黑板樹 (4).jpg","黑板樹 (5).jpg","黑色遮蔭網 (1).jpg","黑色遮蔭網 (2).jpg","黑色遮蔭網 (3).jpg","黑軟盆 (1).jpg","黑軟盆 (2).jpg","黑軟盆 (3).jpg","黑軟盆 (4).jpg","黑軟盆 (5).jpg","黛粉葉 (1).jpg","黛粉葉 (2).jpg","黛粉葉 (3).jpg","黛粉葉 (4).jpg","龍吐珠 (1).jpg","龍吐珠 (2).jpg","龍吐珠 (3).jpg","龍吐珠 (4).jpg","龍吐珠 (5).jpg","龍柏 (1).jpg","龍柏 (2).jpg","龍柏 (3).jpg","龍柏 (4).jpg","龍柏 (5).jpg","龍眼 (1).jpg","龍眼 (10).jpg","龍眼 (11).jpg","龍眼 (12).jpg","龍眼 (13).jpg","龍眼 (2).jpg","龍眼 (3).jpg","龍眼 (4).jpg","龍眼 (5).jpg","龍眼 (6).jpg","龍眼 (7).jpg","龍眼 (8).jpg","龍眼 (9).jpg"]; 
 
     let currentList = JSON.parse(localStorage.getItem('shuffledList')) || [...originalPhotoNames];
     let starredList = JSON.parse(localStorage.getItem('starredPlants')) || [];
     
-    // 記憶模式與進度
+    // 記憶模式與各別進度
     let isStarMode = localStorage.getItem('lastMode') === 'star';
     let currentIndex = parseInt(localStorage.getItem(isStarMode ? 'starIndex' : 'fullIndex')) || 0;
     
@@ -123,11 +128,14 @@
         updateDisplay();
     }
 
-    // 修正一：人類計算法選單 (1, 100, 200... 1900, 2003)
+    // 功能一：人類計算法選單修正 (1, 100... 1900, 2003)
     function updateJumpMenu() {
         const select = document.getElementById('jumpSelect');
         const jumpArea = document.getElementById('jumpArea');
-        if (isStarMode) { jumpArea.style.visibility = "hidden"; return; }
+        if (isStarMode) { 
+            jumpArea.style.visibility = "hidden"; 
+            return; 
+        }
         jumpArea.style.visibility = "visible";
         select.innerHTML = "";
         
@@ -159,12 +167,11 @@
         const ansBtn = document.getElementById('ansBtn');
         const jumpSelect = document.getElementById('jumpSelect');
 
-        // 確保索引不越界
         if (currentIndex >= list.length) currentIndex = 0;
 
         if (!list || list.length === 0) {
             img.style.display = "none";
-            ansArea.innerText = isStarMode ? "目前沒星號難題！" : "列表載入中...";
+            ansArea.innerText = isStarMode ? "目前沒星號難題！" : "列表讀取中...";
             stats.innerText = "進度: 0 / 0";
             starCountText.innerText = `(星號數量: ${starredList.length})`;
             return;
@@ -174,8 +181,9 @@
         img.style.display = "block";
         document.getElementById('zoomImg').src = img.src;
 
-        // 修正二：自動答案連動
-        if (document.getElementById('autoShowCheck').checked) {
+        // 功能二：自動顯示答案按鈕文字連動
+        const isAuto = document.getElementById('autoShowCheck').checked;
+        if (isAuto) {
             showAnswerLogic();
             isAnswerVisible = true;
             ansBtn.innerText = "🙈 隱藏答案";
@@ -189,7 +197,7 @@
         stats.innerText = `進度: ${currentIndex + 1} / ${list.length}`;
         starCountText.innerText = `(星號數量: ${starredList.length})`;
         
-        // 記憶進度
+        // 記憶目前模式與進度
         localStorage.setItem(isStarMode ? 'starIndex' : 'fullIndex', currentIndex);
         
         if (!isStarMode) {
@@ -246,10 +254,10 @@
         
         localStorage.setItem('starredPlants', JSON.stringify(starredList));
         
-        // 修正四：加入星號不影響答案顯示狀態
-        let tempAnswerState = isAnswerVisible;
+        // 功能四：加星號時保留答案顯示狀態
+        let currentAnsState = isAnswerVisible;
         updateDisplay();
-        if(tempAnswerState) {
+        if(currentAnsState) {
             showAnswerLogic();
             document.getElementById('ansBtn').innerText = "🙈 隱藏答案";
             isAnswerVisible = true;
@@ -267,7 +275,6 @@
 
     function toggleMode() {
         isStarMode = !isStarMode;
-        // 修正五：從記憶中讀取該模式的進度
         currentIndex = parseInt(localStorage.getItem(isStarMode ? 'starIndex' : 'fullIndex')) || 0;
         
         const header = document.getElementById('statusHeader');
@@ -275,7 +282,7 @@
         
         header.innerText = isStarMode ? "⭐ 星號複習模式" : "🌐 全庫練習模式";
         header.style.background = isStarMode ? "#d77c29" : "#6b3c2e";
-        modeBtn.innerText = isStarMode ? "切換至全庫練習模式" : "切換至星號複習模式";
+        modeBtn.innerText = isStarMode ? "切換至" + (isStarMode ? "全庫練習" : "星號複習") + "模式";
         
         localStorage.setItem('lastMode', isStarMode ? 'star' : 'full');
         document.getElementById('starAdmin').style.display = isStarMode ? "block" : "none";
@@ -293,7 +300,7 @@
     }
 
     function shuffleCurrentList() {
-        if (confirm("確定要打亂順序嗎？（全庫練習進度將歸零）")) {
+        if (confirm("確定要打亂順序嗎？（進度將歸零）")) {
             currentList = [...originalPhotoNames];
             shuffleArray(currentList);
             localStorage.setItem('shuffledList', JSON.stringify(currentList));
