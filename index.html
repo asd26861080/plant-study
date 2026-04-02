@@ -21,26 +21,24 @@
 <body>
 
 <div class="container">
-    <img id="displayImg" src="" style="display:none;">
-    <div id="answer"></div>
+    <img id="displayImg" src="" style="display:none; width:100%; max-height:45vh; object-fit:contain; border-radius:12px; margin-bottom: 5px;">
+    
+    <div id="answer" style="min-height: 1.5em; margin: 5px 0 15px 0; font-weight: bold; color: #2d3436; font-size: 1.25rem; text-align: center;"></div>
 
-   <div class="container">
-    <img id="displayImg" src="" style="display:none;">
-    <div id="answer"></div>
-
-    <div class="btn-group">
-        <button class="btn-ans" onclick="showAnswer()">顯示答案</button>
-        <button id="starBtn" onclick="toggleStar()" style="grid-column: span 2; background: #ecf0f1;">☆ 標記星號</button>
-        <button class="btn-wrong" onclick="nextQuestion()">我不確定 (下一題)</button>
-        <button class="btn-next" onclick="nextQuestion()">我會了 (下一題)</button>
+    <div class="btn-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn-ans" onclick="showAnswer()" style="grid-column: span 2; background: #55efc4; padding: 15px; font-size: 1.1rem;">顯示答案</button>
+        
+        <button id="starBtn" onclick="toggleStar()" style="grid-column: span 2; background: #ecf0f1; padding: 12px;">☆ 標記星號 (加強練習)</button>
+        
+        <button class="btn-prev" onclick="prevQuestion()" style="background: #fab1a0; padding: 12px; border:none; border-radius:8px; cursor:pointer;">上一題</button>
+        <button class="btn-next" onclick="nextQuestion()" style="background: #74b9ff; padding: 12px; border:none; border-radius:8px; cursor:pointer; color:white;">下一題</button>
     </div>
 
-    <div class="stats" id="stats"></div>
+    <div class="stats" id="stats" style="margin-top: 20px; font-size: 0.9rem; color: #636e72; text-align: center; line-height: 1.6;"></div>
     
-    <button id="modeBtn" onclick="toggleMode()" style="margin-top: 15px; background: #74b9ff; color: white; width: 100%;">切換：重點模式 (0)</button>
-    <button onclick="clearAllStars()" style="margin-top: 8px; background: #bdc3c7; color: white; width: 100%; font-size: 12px; border-radius: 8px; padding: 5px;">清空所有星號紀錄</button>
-</div>
-    <button id="modeBtn" onclick="toggleWrongMode()">切換：練習錯題 (0)</button>
+    <button id="modeBtn" onclick="toggleMode()" style="margin-top: 15px; background: #0984e3; color: white; width: 100%; border-radius: 8px; padding: 10px; border:none; cursor:pointer;">切換：重點模式 (0)</button>
+    
+    <button onclick="clearAllStars()" style="margin-top: 10px; background: #b2bec3; color: white; width: 100%; font-size: 12px; border-radius: 8px; padding: 5px; border:none; cursor:pointer; opacity: 0.8;">清空所有星號紀錄</button>
 </div>
 
 <script>
@@ -50,10 +48,10 @@
   // --- 以下是新版的星號重點邏輯 ---
 // --- 核心邏輯：從這裡開始替換 ---
     
-    // 讀取星號紀錄
-    let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
+   let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
     let isStarMode = false;
     let currentIndex = -1;
+    let history = []; // 紀錄看過的索引，方便「上一題」回頭
 
     const displayImg = document.getElementById('displayImg');
     const answerDiv = document.getElementById('answer');
@@ -62,30 +60,42 @@
     const starBtn = document.getElementById('starBtn');
 
     window.onload = () => {
-        if (typeof photoNames === 'undefined' || photoNames.length === 0) {
-            alert("錯誤：找不到圖片清單！");
-            return;
-        }
         updateUI();
         nextQuestion();
     };
 
     function nextQuestion() {
         let list = isStarMode ? starredFiles : photoNames;
-        
         if (list.length === 0) {
             if (isStarMode) {
                 alert("重點模式已空，自動回到全題庫。");
                 isStarMode = false;
                 list = photoNames;
-            } else {
-                return;
-            }
+            } else return;
         }
 
-        currentIndex = Math.floor(Math.random() * list.length);
-        const photoName = list[currentIndex];
+        // 隨機抽題並存入歷史
+        let nextIdx = Math.floor(Math.random() * list.length);
+        history.push(nextIdx); 
+        if (history.length > 50) history.shift(); // 只保留最近50筆，避免記憶體過大
+        
+        currentIndex = nextIdx;
+        showPhoto(list[currentIndex]);
+    }
 
+    function prevQuestion() {
+        if (history.length <= 1) {
+            alert("已經是第一張囉！");
+            return;
+        }
+        history.pop(); // 移除當前這張
+        currentIndex = history[history.length - 1]; // 取出前一張
+        
+        let list = isStarMode ? starredFiles : photoNames;
+        showPhoto(list[currentIndex]);
+    }
+
+    function showPhoto(photoName) {
         displayImg.src = encodeURIComponent(photoName);
         displayImg.style.display = 'block';
         answerDiv.innerText = ""; 
@@ -105,7 +115,6 @@
 
         if (starIdx > -1) {
             starredFiles.splice(starIdx, 1);
-            // 重點模式下取消星號，直接跳下一題
             if (isStarMode) {
                 localStorage.setItem('plant_stars', JSON.stringify(starredFiles));
                 nextQuestion();
@@ -125,6 +134,7 @@
             return;
         }
         isStarMode = !isStarMode;
+        history = []; // 切換模式時清空歷史
         nextQuestion();
     }
 
@@ -149,9 +159,10 @@
         }
 
         modeBtn.innerText = isStarMode ? `重點模式練習中 (${starredFiles.length})` : `切換：重點模式 (${starredFiles.length})`;
-        modeBtn.style.background = isStarMode ? "#ff7675" : "#74b9ff";
-
-        statsDiv.innerText = `總庫：${photoNames.length} | 星號：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '隨機全選'}`;
+        
+        // 顯示目前第幾張 / 總張數
+        let progressText = isStarMode ? `重點進度: ${starredFiles.length} 張` : `全庫進度: ${history.length} / ${photoNames.length} 張`;
+        statsDiv.innerHTML = `題庫：${photoNames.length} | 星號：${starredFiles.length}<br><b>${progressText}</b> | 模式：${isStarMode ? '重點複習' : '隨機全選'}`;
     }
 </script>
 </body>
