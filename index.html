@@ -75,29 +75,39 @@
 
     function nextQuestion() {
         if (!isStarMode) {
+            // 全庫隨機模式：邏輯不變
             currentIndex = Math.floor(Math.random() * photoNames.length);
             history.push(currentIndex);
-            // 儲存進度到手機
             localStorage.setItem('plant_history', JSON.stringify(history));
             showPhoto(photoNames[currentIndex]);
         } else {
+            // 重點模式修正：
             if (starredFiles.length === 0) {
                 alert("標記清單已空！");
                 toggleMode();
                 return;
             }
-            starModeIndex++;
-            currentIndex = Math.floor(Math.random() * starredFiles.length);
+            // 讓 index 在 0 到 (總數-1) 之間循環
+            starModeIndex = (starModeIndex + 1) % starredFiles.length;
+            currentIndex = starModeIndex; // 直接指向星號清單的該位置
             showPhoto(starredFiles[currentIndex]);
         }
     }
 
     function prevQuestion() {
-        if (isStarMode || history.length <= 1) return;
-        history.pop();
-        currentIndex = history[history.length - 1];
-        localStorage.setItem('plant_history', JSON.stringify(history));
-        showPhoto(photoNames[currentIndex]);
+        if (!isStarMode) {
+            if (history.length <= 1) return;
+            history.pop();
+            currentIndex = history[history.length - 1];
+            localStorage.setItem('plant_history', JSON.stringify(history));
+            showPhoto(photoNames[currentIndex]);
+        } else {
+            // 重點模式的上一題：往前循環
+            if (starredFiles.length === 0) return;
+            starModeIndex = (starModeIndex - 1 + starredFiles.length) % starredFiles.length;
+            currentIndex = starModeIndex;
+            showPhoto(starredFiles[currentIndex]);
+        }
     }
 
     function showPhoto(photoName) {
@@ -152,8 +162,9 @@
         modeBtn.innerText = isStarMode ? "← 回到全庫練習" : `進入重點模式 (${starredFiles.length})`;
         modeBtn.style.background = isStarMode ? "#6b3c2e" : "#9a5a2e";
 
+        // 修正顯示文字：如果是星號模式，顯示 (當前序號+1) / 總數
         let progress = isStarMode 
-            ? `重點複習進度：${starModeIndex} / ${starredFiles.length}` 
+            ? `重點複習中：第 ${starModeIndex + 1} / ${starredFiles.length} 張` 
             : `全庫練習進度：已看 ${history.length} / ${photoNames.length}`;
         
         statsDiv.innerHTML = `<b>${progress}</b><br>標記星號：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '全庫隨機'}`;
