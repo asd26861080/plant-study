@@ -52,11 +52,14 @@
 
 // --- 1. 新增星號進度變數 ---
 // --- 1. 變數聲明 ---
-// --- 1. 核心變數 ---
+// 1. 這裡請保留妳原本那串長長的 photoNames 陣列
+// ---    const photoNames = ["一串紅（爆竹紅） (1).jpg", ... ]; 
+
+    // --- 2. 核心變數 ---
     let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
     let isStarMode = false;
     
-    // 全庫模式：改用「洗牌後的順序」
+    // 全庫模式：洗牌順序
     let shuffledOrder = JSON.parse(localStorage.getItem('plant_shuffled_order') || '[]');
     let currentIndex = parseInt(localStorage.getItem('plant_current_index') || '0');
     
@@ -69,15 +72,20 @@
     const modeBtn = document.getElementById('modeBtn');
     const starBtn = document.getElementById('starBtn');
 
-    // --- 2. 初始化：如果沒洗過牌，就洗一次 ---
+    // --- 3. 初始化 ---
     window.onload = () => {
+        // 如果沒洗過牌，就洗一次
         if (shuffledOrder.length !== photoNames.length) {
             generateNewShuffle();
         }
+        
+        // 加入跳題下拉選單 (每100題一格)
+        createJumpMenu();
+        
+        // 直接顯示上次進度，不跳通知詢問
         showPhoto(photoNames[shuffledOrder[currentIndex]]);
     };
 
-    // 洗牌演算法：確保 2003 題順序隨機但固定
     function generateNewShuffle() {
         let arr = Array.from({length: photoNames.length}, (v, k) => k);
         for (let i = arr.length - 1; i > 0; i--) {
@@ -90,18 +98,45 @@
         localStorage.setItem('plant_current_index', 0);
     }
 
-    // --- 3. 核心切換邏輯 ---
+    // 建立下拉選單
+    function createJumpMenu() {
+        const jumpContainer = document.createElement('div');
+        jumpContainer.style.margin = "10px 0";
+        
+        let selectHTML = `<select id="jumpSelect" onchange="jumpTo(this.value)" style="padding: 8px; border-radius: 8px; border: 1px solid #d77c29; color: #6b3c2e; font-weight: bold;">`;
+        selectHTML += `<option value="0">第 1 題</option>`;
+        
+        for (let i = 100; i < photoNames.length; i += 100) {
+            selectHTML += `<option value="${i}">第 ${i} 題</option>`;
+        }
+        
+        selectHTML += `<option value="${photoNames.length - 1}">第 ${photoNames.length} 題</option>`;
+        selectHTML += `</select>`;
+        
+        jumpContainer.innerHTML = `<span style="font-size: 14px;">快速跳題：</span>` + selectHTML;
+        // 把選單插入到 stats 之前
+        statsDiv.parentNode.insertBefore(jumpContainer, statsDiv);
+    }
+
+    function jumpTo(val) {
+        if (isStarMode) {
+            alert("請先切換回全庫模式再跳題喔！");
+            return;
+        }
+        currentIndex = parseInt(val);
+        localStorage.setItem('plant_current_index', currentIndex);
+        showPhoto(photoNames[shuffledOrder[currentIndex]]);
+    }
+
+    // --- 4. 導覽邏輯 ---
     function nextQuestion() {
         if (!isStarMode) {
             if (currentIndex < shuffledOrder.length - 1) {
                 currentIndex++;
-                saveProgress();
+                localStorage.setItem('plant_current_index', currentIndex);
                 showPhoto(photoNames[shuffledOrder[currentIndex]]);
             } else {
-                if (confirm("妳已經看完全部 2003 題了！要重新洗牌開始新一輪嗎？")) {
-                    generateNewShuffle();
-                    showPhoto(photoNames[shuffledOrder[0]]);
-                }
+                alert("妳已經看完全部囉！");
             }
         } else {
             if (starredFiles.length === 0) return;
@@ -115,7 +150,7 @@
         if (!isStarMode) {
             if (currentIndex > 0) {
                 currentIndex--;
-                saveProgress();
+                localStorage.setItem('plant_current_index', currentIndex);
                 showPhoto(photoNames[shuffledOrder[currentIndex]]);
             }
         } else {
@@ -126,20 +161,21 @@
         }
     }
 
-    function saveProgress() {
-        localStorage.setItem('plant_current_index', currentIndex);
-    }
-
     function showPhoto(photoName) {
-        displayImg.src = encodeURIComponent(photoName);
-        displayImg.style.display = 'block';
-        answerDiv.innerText = ""; 
-        updateUI();
+        // 修正：如果 photoName 存在才顯示
+        if (photoName) {
+            displayImg.src = encodeURIComponent(photoName);
+            displayImg.style.display = 'block';
+            answerDiv.innerText = ""; 
+            updateUI();
+        }
     }
 
     function showAnswer() {
         let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[shuffledOrder[currentIndex]];
-        answerDiv.innerText = currentFile.split(' (')[0].split('.')[0];
+        if (currentFile) {
+            answerDiv.innerText = currentFile.split(' (')[0].split('.')[0];
+        }
     }
 
     function toggleStar() {
@@ -150,7 +186,6 @@
             starredFiles.splice(starIdx, 1);
             if (isStarMode) {
                 if (starredFiles.length === 0) {
-                    alert("標記已空，回到全庫模式");
                     toggleMode();
                 } else {
                     starModeIndex = starModeIndex % starredFiles.length;
@@ -166,6 +201,60 @@
 
     function toggleMode() {
         if (starredFiles.length === 0 && !isStarMode) {
+            alert("還沒有標記星號喔！");
+            return;
+        }
+        isStarMode = !isStarMode;
+        if (isStarMode) {
+            showPhoto(starredFiles[starModeIndex % starredFiles.length]);
+        } else {
+            showPhoto(photoNames[shuffledOrder[currentIndex]]);
+        }
+    }
+
+    function updateUI() {
+        const statusHeader = document.getElementById('statusHeader');
+        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[shuffledOrder[currentIndex]];
+        const isStarred = starredFiles.includes(currentFile);
+
+        statusHeader.innerText = isStarMode ? "⭐ 重點複習模式" : "🌐 全庫練習模式";
+        statusHeader.style.background = isStarMode ? "#d77c29" : "#6b3c2e";
+
+        starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號";
+        starBtn.style.background = isStarred ? "#b86f2d" : "#f7c74f";
+        starBtn.style.color = isStarred ? "white" : "#6b3c2e";
+
+        modeBtn.innerText = isStarMode ? "← 回到全庫練習" : `進入重點模式 (${starredFiles.length})`;
+
+        let progressText = isStarMode 
+            ? `重點複習中：第 ${starModeIndex + 1} / ${starredFiles.length} 張` 
+            : `全庫練習：第 ${currentIndex + 1} / ${photoNames.length} 題`;
+        
+        statsDiv.innerHTML = `<b>${progressText}</b><br>標記星號：${starredFiles.length}`;
+        
+        // 同步更新下拉選單的值
+        const jumpSelect = document.getElementById('jumpSelect');
+        if (jumpSelect && !isStarMode) {
+            // 找最靠近的 100 倍數
+            let closestVal = Math.floor(currentIndex / 100) * 100;
+            jumpSelect.value = closestVal;
+        }
+    }
+
+    function resetProgress() {
+        if (confirm("確定要重新洗牌嗎？這會讓妳從第 1 題重新開始。")) {
+            generateNewShuffle();
+            showPhoto(photoNames[shuffledOrder[0]]);
+        }
+    }
+
+    function clearAllStars() {
+        if (confirm("確定清空所有星號嗎？")) {
+            starredFiles = [];
+            localStorage.setItem('plant_stars', '[]');
+            updateUI();
+        }
+    }
 </script>
 </body>
 </html>
