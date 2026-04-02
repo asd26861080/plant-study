@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌿 2003題植物辨識衝刺</title>
     <style>
-        body { font-family: -apple-system, sans-serif; text-align: center; background: #f0f2f5; margin: 0; padding: 15px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        img { width: 100%; max-height: 450px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; background: #eee; }
-        #answer { font-size: 24px; font-weight: bold; color: #2d3436; margin: 15px 0; min-height: 36px; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 15px; font-size: 18px; cursor: pointer; border: none; border-radius: 12px; font-weight: bold; transition: 0.2s; }
-        .btn-ans { background: #fdcb6e; color: #2d3436; grid-column: span 2; }
-        .btn-wrong { background: #ff7675; color: white; }
-        .btn-next { background: #55efc4; color: #2d3436; }
-        .stats { margin-top: 20px; font-size: 14px; color: #636e72; padding-top: 15px; border-top: 1px solid #eee; }
-        #modeBtn { margin-top: 10px; background: #74b9ff; color: white; width: 100%; }
-    </style>
+    body { font-family: -apple-system, sans-serif; text-align: center; background: #F0E4D4; margin: 0; padding: 15px; color: #917B56; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(145, 123, 86, 0.2); }
+    img { width: 100%; max-height: 40vh; object-fit: contain; border-radius: 12px; margin-bottom: 5px; background: #F9D9CA; }
+    #answer { font-size: 22px; font-weight: bold; color: #D18063; margin: 10px 0; min-height: 1.5em; }
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    
+    /* 按鈕顏色配置 */
+    button { padding: 12px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; font-weight: bold; transition: 0.3s; }
+    .btn-ans { background: #D18063; color: white; grid-column: span 2; }
+    #starBtn { grid-column: span 2; background: #F9D9CA; color: #917B56; }
+    .btn-prev { background: #F0E4D4; color: #917B56; }
+    .btn-next { background: #917B56; color: white; }
+    
+    #modeBtn { margin-top: 15px; width: 100%; background: #D18063; color: white; }
+    .stats { margin-top: 15px; font-size: 14px; color: #917B56; border-top: 1px solid #F9D9CA; padding-top: 10px; line-height: 1.6; }
+</style>
 </head>
 <body>
 
@@ -48,10 +52,11 @@
   // --- 以下是新版的星號重點邏輯 ---
 // --- 核心邏輯區：請接在 photoNames 之後 ---
     
-    let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
+   let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
     let isStarMode = false;
     let currentIndex = -1;
-    let history = []; // 紀錄看過的索引，方便「上一題」功能
+    let starModeIndex = 0; // 用於星號模式的進度追蹤
+    let history = []; 
 
     const displayImg = document.getElementById('displayImg');
     const answerDiv = document.getElementById('answer');
@@ -60,48 +65,42 @@
     const starBtn = document.getElementById('starBtn');
 
     window.onload = () => {
-        if (typeof photoNames === 'undefined' || photoNames.length === 0) {
-            alert("錯誤：找不到圖片清單！");
-            return;
-        }
         updateUI();
         nextQuestion();
     };
 
     function nextQuestion() {
-        let list = isStarMode ? starredFiles : photoNames;
-        
-        if (list.length === 0) {
-            if (isStarMode) {
-                alert("重點模式已空，自動回到全題庫。");
-                isStarMode = false;
-                list = photoNames;
-            } else return;
+        if (!isStarMode) {
+            // 全庫模式：隨機抽題
+            currentIndex = Math.floor(Math.random() * photoNames.length);
+            history.push(currentIndex);
+            if (history.length > 50) history.shift();
+            showPhoto(photoNames[currentIndex]);
+        } else {
+            // 星號模式：按順序或隨機皆可，這裡採隨機以便複習
+            if (starredFiles.length === 0) {
+                alert("標記清單已空，回到全庫模式。");
+                toggleMode();
+                return;
+            }
+            starModeIndex++;
+            currentIndex = Math.floor(Math.random() * starredFiles.length);
+            showPhoto(starredFiles[currentIndex]);
         }
-
-        // 隨機抽題並存入歷史
-        let nextIdx = Math.floor(Math.random() * list.length);
-        history.push(nextIdx); 
-        if (history.length > 50) history.shift(); // 限制紀錄長度
-        
-        currentIndex = nextIdx;
-        showPhoto(list[currentIndex]);
     }
 
     function prevQuestion() {
-        if (history.length <= 1) {
-            alert("前面沒有題目囉！");
+        if (isStarMode) {
+            alert("重點模式目前僅支援隨機下一題喔！");
             return;
         }
-        history.pop(); // 移除當前這張
-        currentIndex = history[history.length - 1]; // 取出前一張
-        
-        let list = isStarMode ? starredFiles : photoNames;
-        showPhoto(list[currentIndex]);
+        if (history.length <= 1) return;
+        history.pop();
+        currentIndex = history[history.length - 1];
+        showPhoto(photoNames[currentIndex]);
     }
 
     function showPhoto(photoName) {
-        // 使用 encodeURIComponent 處理中文檔名
         displayImg.src = encodeURIComponent(photoName);
         displayImg.style.display = 'block';
         answerDiv.innerText = ""; 
@@ -110,8 +109,6 @@
 
     function showAnswer() {
         let list = isStarMode ? starredFiles : photoNames;
-        if (currentIndex === -1) return;
-        // 移除副檔名顯示純植物名
         answerDiv.innerText = list[currentIndex].split(' (')[0].split('.')[0];
     }
 
@@ -124,51 +121,57 @@
             starredFiles.splice(starIdx, 1);
             if (isStarMode) {
                 localStorage.setItem('plant_stars', JSON.stringify(starredFiles));
-                nextQuestion();
+                nextQuestion(); // 重點模式下取消星號直接跳題
                 return;
             }
         } else {
             starredFiles.push(photo);
         }
-
         localStorage.setItem('plant_stars', JSON.stringify(starredFiles));
         updateUI();
     }
 
     function toggleMode() {
         if (starredFiles.length === 0 && !isStarMode) {
-            alert("尚未標記任何星號。");
+            alert("還沒有標記任何星號喔！");
             return;
         }
         isStarMode = !isStarMode;
-        history = []; // 切換模式時清空歷史
+        starModeIndex = 0; // 切換時重設進度
+        history = []; 
         nextQuestion();
     }
 
     function clearAllStars() {
-        if (confirm("要清空所有標記星號嗎？")) {
+        if (confirm("要清空所有星號紀錄嗎？")) {
             starredFiles = [];
             localStorage.setItem('plant_stars', '[]');
-            isStarMode = false;
+            if (isStarMode) toggleMode();
             updateUI();
-            nextQuestion();
         }
     }
 
     function updateUI() {
         let list = isStarMode ? starredFiles : photoNames;
-        const photo = list[currentIndex];
-        const isStarred = starredFiles.includes(photo);
+        const isStarred = starredFiles.includes(list[currentIndex]);
 
-        if (starBtn) {
-            starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號 (加強練習)";
-            starBtn.style.background = isStarred ? "#f1c40f" : "#ecf0f1";
+        starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號";
+        starBtn.style.background = isStarred ? "#D18063" : "#F9D9CA";
+        starBtn.style.color = isStarred ? "white" : "#917B56";
+
+        // 動態調整模式按鈕文字與顏色
+        modeBtn.innerText = isStarMode ? "← 回到全庫隨機練習" : `進入重點模式 (${starredFiles.length})`;
+        modeBtn.style.background = isStarMode ? "#917B56" : "#D18063";
+
+        // 呈現進度：全庫模式顯示已看張數，星號模式顯示星號進度
+        let progress;
+        if (isStarMode) {
+            progress = `重點複習進度：第 ${starModeIndex} 張 / 共 ${starredFiles.length} 張`;
+        } else {
+            progress = `全庫練習進度：已看 ${history.length} 張 / 總共 ${photoNames.length} 張`;
         }
-
-        modeBtn.innerText = isStarMode ? `重點模式練習中 (${starredFiles.length})` : `切換：重點模式 (${starredFiles.length})`;
         
-        let progressText = isStarMode ? `重點進度: ${starredFiles.length} 張` : `已看題數: ${history.length} / ${photoNames.length}`;
-        statsDiv.innerHTML = `題庫總量：${photoNames.length} | 標記星號：${starredFiles.length}<br><b>${progressText}</b> | 模式：${isStarMode ? '重點複習' : '隨機全選'}`;
+        statsDiv.innerHTML = `<b>${progress}</b><br>標記星號總數：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '全庫隨機'}`;
     }
 </script>
 </body>
