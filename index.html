@@ -38,22 +38,25 @@
 <body>
 
 <div class="container">
-    <img id="displayImg" src="" style="display:none; width:100%; max-height:45vh; object-fit:contain; border-radius:12px; margin-bottom: 5px;">
+    <img id="displayImg" src="" style="display:none;">
     
-    <div id="answer" style="min-height: 1.5em; margin: 5px 0 15px 0; font-weight: bold; color: #2d3436; font-size: 1.25rem; text-align: center;"></div>
+    <div id="answer"></div>
 
-    <div class="btn-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn-ans" onclick="showAnswer()" style="grid-column: span 2; background: #55efc4; padding: 15px; font-size: 1.1rem;">顯示答案</button>
+    <div class="btn-group">
+        <button class="btn-ans" onclick="showAnswer()">顯示答案</button>
         
-        <button id="starBtn" onclick="toggleStar()" style="grid-column: span 2; background: #ecf0f1; padding: 12px;">☆ 標記星號 (加強練習)</button>
+        <button id="starBtn" onclick="toggleStar()">☆ 標記星號 (加強練習)</button>
         
-        <button class="btn-prev" onclick="prevQuestion()" style="background: #fab1a0; padding: 12px; border:none; border-radius:8px; cursor:pointer;">上一題</button>
-        <button class="btn-next" onclick="nextQuestion()" style="background: #74b9ff; padding: 12px; border:none; border-radius:8px; cursor:pointer; color:white;">下一題</button>
+        <button class="btn-prev" onclick="prevQuestion()">上一題</button>
+        <button class="btn-next" onclick="nextQuestion()">下一題</button>
     </div>
 
-    <div class="stats" id="stats" style="margin-top: 20px; font-size: 0.9rem; color: #636e72; text-align: center; line-height: 1.6;"></div>
+    <div class="stats" id="stats"></div>
     
-    <button id="modeBtn" onclick="toggleMode()" style="margin-top: 15px; background: #0984e3; color: white; width: 100%; border-radius: 8px; padding: 10px; border:none; cursor:pointer;">切換：重點模式 (0)</button>
+    <button id="modeBtn" onclick="toggleMode()">切換：重點模式 (0)</button>
+    
+    <button onclick="clearAllStars()" style="margin-top: 10px; background: #b2bec3; color: white; width: 100%; font-size: 12px; border-radius: 8px; padding: 5px; border:none; cursor:pointer; opacity: 0.6;">清空所有星號紀錄</button>
+
     
     <button onclick="clearAllStars()" style="margin-top: 10px; background: #b2bec3; color: white; width: 100%; font-size: 12px; border-radius: 8px; padding: 5px; border:none; cursor:pointer; opacity: 0.8;">清空所有星號紀錄</button>
 </div>
