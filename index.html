@@ -26,6 +26,9 @@
 <body>
 
 <div class="container">
+<div id="statusHeader" style="margin: -20px -20px 15px -20px; padding: 10px; border-radius: 20px 20px 0 0; background: #6b3c2e; color: white; font-weight: bold; font-size: 18px;">
+    🌐 全庫練習模式
+</div>
     <img id="displayImg" src="" style="display:none;">
     <div id="answer"></div>
 
@@ -154,7 +157,18 @@
     function updateUI() {
         let list = isStarMode ? starredFiles : photoNames;
         const isStarred = starredFiles.includes(list[currentIndex]);
+        const statusHeader = document.getElementById('statusHeader');
 
+        // --- 新增：最上方狀態列切換邏輯 ---
+        if (isStarMode) {
+            statusHeader.innerText = "⭐ 重點複習模式";
+            statusHeader.style.background = "#d77c29"; // 橘色代表重點
+        } else {
+            statusHeader.innerText = "🌐 全庫練習模式";
+            statusHeader.style.background = "#6b3c2e"; // 深褐代表全庫
+        }
+
+        // 按鈕顏色與文字更新
         starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號";
         starBtn.style.background = isStarred ? "#b86f2d" : "#f7c74f";
         starBtn.style.color = isStarred ? "white" : "#6b3c2e";
@@ -162,14 +176,13 @@
         modeBtn.innerText = isStarMode ? "← 回到全庫練習" : `進入重點模式 (${starredFiles.length})`;
         modeBtn.style.background = isStarMode ? "#6b3c2e" : "#9a5a2e";
 
-        // 修正顯示文字：如果是星號模式，顯示 (當前序號+1) / 總數
+        // 進度顯示更新
         let progress = isStarMode 
             ? `重點複習中：第 ${starModeIndex + 1} / ${starredFiles.length} 張` 
             : `全庫練習進度：已看 ${history.length} / ${photoNames.length}`;
         
-        statsDiv.innerHTML = `<b>${progress}</b><br>標記星號：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '全庫隨機'}`;
+        statsDiv.innerHTML = `<b>${progress}</b><br>標記星號：${starredFiles.length}`;
     }
-
     function resetProgress() {
         if (confirm("確定要重置已看過的圖片紀錄嗎？(不影響星號)")) {
             history = [];
