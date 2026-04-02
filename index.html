@@ -99,22 +99,26 @@
     }
 
     // 建立下拉選單
+    // 建立下拉選單 (修正後的版本)
     function createJumpMenu() {
         const jumpContainer = document.createElement('div');
         jumpContainer.style.margin = "10px 0";
         
         let selectHTML = `<select id="jumpSelect" onchange="jumpTo(this.value)" style="padding: 8px; border-radius: 8px; border: 1px solid #d77c29; color: #6b3c2e; font-weight: bold;">`;
+        
+        // 第一題：對應索引 0
         selectHTML += `<option value="0">第 1 題</option>`;
         
+        // 中間每 100 題：數值減 1 讓它對應正確索引
         for (let i = 100; i < photoNames.length; i += 100) {
-            selectHTML += `<option value="${i}">第 ${i} 題</option>`;
+            selectHTML += `<option value="${i-1}">第 ${i} 題</option>`;
         }
         
+        // 最後一題：對應最後一個索引
         selectHTML += `<option value="${photoNames.length - 1}">第 ${photoNames.length} 題</option>`;
         selectHTML += `</select>`;
         
         jumpContainer.innerHTML = `<span style="font-size: 14px;">快速跳題：</span>` + selectHTML;
-        // 把選單插入到 stats 之前
         statsDiv.parentNode.insertBefore(jumpContainer, statsDiv);
     }
 
