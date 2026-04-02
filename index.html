@@ -52,12 +52,16 @@
 
 // --- 1. 新增星號進度變數 ---
 // --- 1. 變數聲明 ---
+// --- 1. 核心變數 ---
     let starredFiles = JSON.parse(localStorage.getItem('plant_stars') || '[]');
     let isStarMode = false;
-    let currentIndex = -1;
-    // 讀取上次星號模式看過的索引，預設是 0
+    
+    // 全庫模式：改用「洗牌後的順序」
+    let shuffledOrder = JSON.parse(localStorage.getItem('plant_shuffled_order') || '[]');
+    let currentIndex = parseInt(localStorage.getItem('plant_current_index') || '0');
+    
+    // 星號模式進度
     let starModeIndex = parseInt(localStorage.getItem('plant_star_index') || '0');
-    let history = JSON.parse(localStorage.getItem('plant_history') || '[]'); 
 
     const displayImg = document.getElementById('displayImg');
     const answerDiv = document.getElementById('answer');
@@ -65,32 +69,42 @@
     const modeBtn = document.getElementById('modeBtn');
     const starBtn = document.getElementById('starBtn');
 
+    // --- 2. 初始化：如果沒洗過牌，就洗一次 ---
     window.onload = () => {
-        // 啟動時檢查：如果有歷史紀錄，詢問是否恢復
-        if (history.length > 0) {
-            if (confirm(`偵測到上次練習到第 ${history.length} 張，要繼續嗎？`)) {
-                currentIndex = history[history.length - 1];
-                showPhoto(photoNames[currentIndex]);
-            } else {
-                nextQuestion();
-            }
-        } else {
-            nextQuestion();
+        if (shuffledOrder.length !== photoNames.length) {
+            generateNewShuffle();
         }
+        showPhoto(photoNames[shuffledOrder[currentIndex]]);
     };
 
+    // 洗牌演算法：確保 2003 題順序隨機但固定
+    function generateNewShuffle() {
+        let arr = Array.from({length: photoNames.length}, (v, k) => k);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        shuffledOrder = arr;
+        currentIndex = 0;
+        localStorage.setItem('plant_shuffled_order', JSON.stringify(shuffledOrder));
+        localStorage.setItem('plant_current_index', 0);
+    }
+
+    // --- 3. 核心切換邏輯 ---
     function nextQuestion() {
         if (!isStarMode) {
-            currentIndex = Math.floor(Math.random() * photoNames.length);
-            history.push(currentIndex);
-            localStorage.setItem('plant_history', JSON.stringify(history));
-            showPhoto(photoNames[currentIndex]);
-        } else {
-            if (starredFiles.length === 0) {
-                alert("標記清單已空！");
-                toggleMode();
-                return;
+            if (currentIndex < shuffledOrder.length - 1) {
+                currentIndex++;
+                saveProgress();
+                showPhoto(photoNames[shuffledOrder[currentIndex]]);
+            } else {
+                if (confirm("妳已經看完全部 2003 題了！要重新洗牌開始新一輪嗎？")) {
+                    generateNewShuffle();
+                    showPhoto(photoNames[shuffledOrder[0]]);
+                }
             }
+        } else {
+            if (starredFiles.length === 0) return;
             starModeIndex = (starModeIndex + 1) % starredFiles.length;
             localStorage.setItem('plant_star_index', starModeIndex);
             showPhoto(starredFiles[starModeIndex]);
@@ -99,11 +113,11 @@
 
     function prevQuestion() {
         if (!isStarMode) {
-            if (history.length <= 1) return;
-            history.pop();
-            currentIndex = history[history.length - 1];
-            localStorage.setItem('plant_history', JSON.stringify(history));
-            showPhoto(photoNames[currentIndex]);
+            if (currentIndex > 0) {
+                currentIndex--;
+                saveProgress();
+                showPhoto(photoNames[shuffledOrder[currentIndex]]);
+            }
         } else {
             if (starredFiles.length === 0) return;
             starModeIndex = (starModeIndex - 1 + starredFiles.length) % starredFiles.length;
@@ -112,8 +126,11 @@
         }
     }
 
+    function saveProgress() {
+        localStorage.setItem('plant_current_index', currentIndex);
+    }
+
     function showPhoto(photoName) {
-        // 處理圖片路徑編碼（避免中文檔名失效）
         displayImg.src = encodeURIComponent(photoName);
         displayImg.style.display = 'block';
         answerDiv.innerText = ""; 
@@ -121,21 +138,19 @@
     }
 
     function showAnswer() {
-        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[currentIndex];
-        // 簡單過濾掉檔名後的括號與副檔名
+        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[shuffledOrder[currentIndex]];
         answerDiv.innerText = currentFile.split(' (')[0].split('.')[0];
     }
 
     function toggleStar() {
-        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[currentIndex];
+        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[shuffledOrder[currentIndex]];
         const starIdx = starredFiles.indexOf(currentFile);
         
         if (starIdx > -1) {
             starredFiles.splice(starIdx, 1);
-            // 如果在重點模式取消星號，自動跳下一題
             if (isStarMode) {
                 if (starredFiles.length === 0) {
-                    alert("已經沒有標記的圖片囉！回到全庫模式。");
+                    alert("標記已空，回到全庫模式");
                     toggleMode();
                 } else {
                     starModeIndex = starModeIndex % starredFiles.length;
@@ -151,80 +166,6 @@
 
     function toggleMode() {
         if (starredFiles.length === 0 && !isStarMode) {
-            alert("還沒有標記星號喔！");
-            return;
-        }
-        isStarMode = !isStarMode;
-        if (isStarMode) {
-            // 切換到重點模式時，顯示上次存的那個索引
-            showPhoto(starredFiles[starModeIndex % starredFiles.length]);
-        } else {
-            // 回到全庫模式，顯示歷史紀錄最後一筆
-            showPhoto(photoNames[currentIndex]);
-        }
-    }
-
-    function resetStarProgress() {
-        if (isStarMode && starredFiles.length > 0) {
-            starModeIndex = 0;
-            localStorage.setItem('plant_star_index', 0);
-            showPhoto(starredFiles[0]);
-            alert("已回到重點模式第一張！");
-        }
-    }
-
-    function updateUI() {
-        let currentFile = isStarMode ? starredFiles[starModeIndex] : photoNames[currentIndex];
-        const isStarred = starredFiles.includes(currentFile);
-        const statusHeader = document.getElementById('statusHeader');
-
-        // 頂部狀態列
-        if (isStarMode) {
-            statusHeader.innerText = "⭐ 重點複習模式";
-            statusHeader.style.background = "#d77c29"; 
-        } else {
-            statusHeader.innerText = "🌐 全庫練習模式";
-            statusHeader.style.background = "#6b3c2e"; 
-        }
-
-        // 星號按鈕
-        starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號";
-        starBtn.style.background = isStarred ? "#b86f2d" : "#f7c74f";
-        starBtn.style.color = isStarred ? "white" : "#6b3c2e";
-
-        // 切換模式按鈕
-        modeBtn.innerText = isStarMode ? "← 回到全庫練習" : `進入重點模式 (${starredFiles.length})`;
-        modeBtn.style.background = isStarMode ? "#6b3c2e" : "#9a5a2e";
-
-        // 進度顯示與從頭複習鈕
-        let progressText = isStarMode 
-            ? `重點複習中：第 ${starModeIndex + 1} / ${starredFiles.length} 張` 
-            : `全庫練習進度：已看 ${history.length} / ${photoNames.length}`;
-        
-        let resetStarBtn = isStarMode 
-            ? `<br><button onclick="resetStarProgress()" style="margin-top: 8px; background: #eee; color: #6b3c2e; padding: 4px 10px; font-size: 12px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;">🔄 從第一張開始複習</button>` 
-            : '';
-
-        statsDiv.innerHTML = `<b>${progressText}</b>${resetStarBtn}<br>標記星號：${starredFiles.length}`;
-    }
-
-    function resetProgress() {
-        if (confirm("確定要重置已看過的圖片紀錄嗎？(不影響星號)")) {
-            history = [];
-            localStorage.removeItem('plant_history');
-            nextQuestion();
-        }
-    }
-
-    function clearAllStars() {
-        if (confirm("確定清空所有星號嗎？")) {
-            starredFiles = [];
-            localStorage.setItem('plant_stars', '[]');
-            localStorage.setItem('plant_star_index', 0);
-            if (isStarMode) toggleMode();
-            updateUI();
-        }
-    }
 </script>
 </body>
 </html>
