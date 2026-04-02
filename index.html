@@ -4,22 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌿 2003題植物辨識衝刺</title>
-    <style>
-    body { font-family: -apple-system, sans-serif; text-align: center; background: #F0E4D4; margin: 0; padding: 15px; color: #917B56; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(145, 123, 86, 0.2); }
-    img { width: 100%; max-height: 40vh; object-fit: contain; border-radius: 12px; margin-bottom: 5px; background: #F9D9CA; }
-    #answer { font-size: 22px; font-weight: bold; color: #D18063; margin: 10px 0; min-height: 1.5em; }
-    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+<style>
+    /* 背景與整體氛圍 */
+    body { font-family: -apple-system, sans-serif; text-align: center; background: #f1e09a; margin: 0; padding: 15px; color: #6b3c2e; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(107, 60, 46, 0.15); }
     
-    /* 按鈕顏色配置 */
-    button { padding: 12px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; font-weight: bold; transition: 0.3s; }
-    .btn-ans { background: #D18063; color: white; grid-column: span 2; }
-    #starBtn { grid-column: span 2; background: #F9D9CA; color: #917B56; }
-    .btn-prev { background: #F0E4D4; color: #917B56; }
-    .btn-next { background: #917B56; color: white; }
+    /* 圖片區：使用淡暖色背景 */
+    img { width: 100%; max-height: 40vh; object-fit: contain; border-radius: 12px; margin-bottom: 5px; background: #f4d36a; }
     
-    #modeBtn { margin-top: 15px; width: 100%; background: #D18063; color: white; }
-    .stats { margin-top: 15px; font-size: 14px; color: #917B56; border-top: 1px solid #F9D9CA; padding-top: 10px; line-height: 1.6; }
+    /* 答案區：深褐色文字，更有質感 */
+    #answer { font-size: 22px; font-weight: bold; color: #7e4a2f; margin: 10px 0; min-height: 1.5em; }
+    
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { padding: 12px; font-size: 16px; cursor: pointer; border: none; border-radius: 10px; font-weight: bold; transition: 0.3s; color: #6b3c2e; }
+
+    /* 按鈕配色調整 */
+    .btn-ans { background: #f9b234; grid-column: span 2; } /* 顯示答案：明亮的金黃色 */
+    #starBtn { grid-column: span 2; background: #f7c74f; } /* 標記星號：暖黃色 */
+    
+    .btn-prev { background: #f4d36a; } /* 上一題：淺黃色 */
+    .btn-next { background: #d77c29; color: white; } /* 下一題：沉穩的橘色（重點色） */
+
+    /* 底部模式按鈕 */
+    #modeBtn { margin-top: 15px; width: 100%; background: #9a5a2e; color: white; }
+    
+    /* 統計資訊區 */
+    .stats { margin-top: 20px; font-size: 14px; color: #7e4a2f; border-top: 1px solid #f4d36a; padding-top: 15px; line-height: 1.6; }
+    
+    /* 滑過按鈕的微光效果 */
+    button:active { filter: brightness(0.9); transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -153,25 +166,22 @@
 
     function updateUI() {
         let list = isStarMode ? starredFiles : photoNames;
-        const isStarred = starredFiles.includes(list[currentIndex]);
+        const isStarred = starredFiles.includes(isStarMode ? starredFiles[currentIndex] : photoNames[currentIndex]);
 
+        // 標記星號後的配色邏輯
         starBtn.innerText = isStarred ? "★ 已標記 (點擊取消)" : "☆ 標記星號";
-        starBtn.style.background = isStarred ? "#D18063" : "#F9D9CA";
-        starBtn.style.color = isStarred ? "white" : "#917B56";
+        starBtn.style.background = isStarred ? "#b86f2d" : "#f7c74f"; // 標記後變深橘褐色
+        starBtn.style.color = isStarred ? "white" : "#6b3c2e";
 
-        // 動態調整模式按鈕文字與顏色
-        modeBtn.innerText = isStarMode ? "← 回到全庫隨機練習" : `進入重點模式 (${starredFiles.length})`;
-        modeBtn.style.background = isStarMode ? "#917B56" : "#D18063";
+        // 模式切換按鈕
+        modeBtn.innerText = isStarMode ? "← 回到全庫練習" : `進入重點模式 (${starredFiles.length})`;
+        modeBtn.style.background = isStarMode ? "#6b3c2e" : "#9a5a2e";
 
-        // 呈現進度：全庫模式顯示已看張數，星號模式顯示星號進度
-        let progress;
-        if (isStarMode) {
-            progress = `重點複習進度：第 ${starModeIndex} 張 / 共 ${starredFiles.length} 張`;
-        } else {
-            progress = `全庫練習進度：已看 ${history.length} 張 / 總共 ${photoNames.length} 張`;
-        }
+        let progress = isStarMode 
+            ? `重點複習進度：${starModeIndex} / ${starredFiles.length}` 
+            : `全庫練習進度：已看 ${history.length} / ${photoNames.length}`;
         
-        statsDiv.innerHTML = `<b>${progress}</b><br>標記星號總數：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '全庫隨機'}`;
+        statsDiv.innerHTML = `<b>${progress}</b><br>標記星號：${starredFiles.length} | 模式：${isStarMode ? '重點複習' : '全庫隨機'}`;
     }
 </script>
 </body>
