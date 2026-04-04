@@ -33,7 +33,7 @@
         /* 頂部導覽列 */
         .header { background: var(--primary-green); color: white; height: 60px; display: flex; align-items: center; padding: 0 15px; position: relative; flex-shrink: 0; }
         .header-title { flex: 1; text-align: center; font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; }
-        .home-btn { cursor: pointer; font-size: 1.6rem; z-index: 10; width: 40px; }
+        .home-btn { cursor: pointer; font-size: 1.6rem; z-index: 10; width: 40px; height: 60px; display: flex; align-items: center; justify-content: center; }
         
         .nav-menu {
             display: none; position: absolute; top: 60px; left: 10px; background: white; 
@@ -101,6 +101,7 @@
         <div class="home-btn" onclick="toggleMenu()">🏠</div>
         <div class="header-title" id="titleNode">🌿 園藝丙級辨識系統</div>
         <div id="navMenu" class="nav-menu">
+            <div onclick="setMode('home')">🏠 回到首頁</div>
             <div onclick="setMode('study')">📖 進入全題庫複習</div>
             <div onclick="setMode('star')">⭐ 星號清單複習</div>
             <div onclick="setMode('exam_menu')">📝 開始模擬考</div>
@@ -157,7 +158,8 @@
 
     function toggleMenu() {
         const m = document.getElementById('navMenu');
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        const isDisplayed = window.getComputedStyle(m).display === 'block';
+        m.style.display = isDisplayed ? 'none' : 'block';
     }
 
     function setMode(m) {
@@ -288,7 +290,6 @@
     function getJumpOptions() {
         let opt = "";
         if (state.isRandom) {
-            // 人類直覺：1, 100, 200 ... 2003
             for(let i=1; i<=1900; i+=100) opt += `<option value="${i-1}">${i}</option>`;
             opt += `<option value="${originalPhotoNames.length-1}">2003</option>`;
         } else {
@@ -396,7 +397,6 @@
         const fileName = originalPhotoNames[realIdx];
         const correctName = cleanName(fileName);
 
-        // 去重選項邏輯
         let opts = new Set();
         opts.add(correctName);
         while(opts.size < 4) {
@@ -449,7 +449,15 @@
         clearInterval(examData.timer);
         const content = document.getElementById('appContent');
         const score = Math.round(examData.score);
-        let msg = score >= 60 ? "太厲害了吧，記住了那麼多內容才能考 " + score + " 分！" : "沒關係，還好只是模擬考，我們還有時間複習。";
+        
+        let msg = "";
+        if(score === 100) {
+            msg = "考了100分也太厲害了吧!!!";
+        } else if(score >= 60) {
+            msg = "太厲害了吧，記住了那麼多內容才能考 " + score + " 分！";
+        } else {
+            msg = "沒關係，還好只是模擬考，我們還有時間複習。";
+        }
         
         content.innerHTML = `
             <h2 style="color:var(--primary-green); font-size:2.5rem;">${score} 分</h2>
@@ -468,7 +476,6 @@
         `;
     }
 
-    // 初始化啟動
     render();
 </script>
 </body>
